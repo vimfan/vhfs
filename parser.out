@@ -1,0 +1,1008 @@
+Created by PLY version 3.3 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> subpath
+Rule 1     subpath -> subpath path_part
+Rule 2     subpath -> path_part
+Rule 3     path_part -> DELIMITER path_part_node
+Rule 4     path_part -> DELIMITER
+Rule 5     path_part_node -> path_node
+Rule 6     path_part_node -> type_casted_node
+Rule 7     type_casted_node -> cast_part_node path_node
+Rule 8     path_node -> file_node
+Rule 9     path_node -> tag_node
+Rule 10    path_node -> attr_node
+Rule 11    path_node -> ambigous_node
+Rule 12    ambigous_node -> NEGATION identifier
+Rule 13    ambigous_node -> identifier func_node
+Rule 14    tag_node -> identifier
+Rule 15    attr_node -> identifier EQUAL func_arg
+Rule 16    attr_node -> identifier NEQUAL func_arg
+Rule 17    attr_node -> identifier LT func_arg
+Rule 18    attr_node -> identifier LE func_arg
+Rule 19    attr_node -> identifier GT func_arg
+Rule 20    attr_node -> identifier GE func_arg
+Rule 21    attr_node -> identifier ASSIGN func_arg
+Rule 22    attr_node -> identifier LIKE STRING
+Rule 23    attr_node -> identifier REGEXP STRING
+Rule 24    type_casted_value -> cast_part_node func_arg
+Rule 25    cast_part_node -> LPAREN TYPE_CAST RPAREN
+Rule 26    cast_part_node -> LPAREN TYPE_CAST func_node RPAREN
+Rule 27    file_node -> FILE
+Rule 28    file_node -> FILE func_node
+Rule 29    func_node -> FUNC ARG_SPECIFIER args
+Rule 30    func_node -> FUNC
+Rule 31    date_time -> DATE ARG_SPECIFIER TIME
+Rule 32    date_time -> DATE ARG_SPECIFIER INTEGER
+Rule 33    args -> args ARG_SEPARATOR func_arg
+Rule 34    args -> func_arg
+Rule 35    func_arg -> identifier
+Rule 36    func_arg -> INTEGER
+Rule 37    func_arg -> REAL
+Rule 38    func_arg -> STRING
+Rule 39    func_arg -> DATE
+Rule 40    func_arg -> TIME
+Rule 41    func_arg -> type_casted_value
+Rule 42    func_arg -> date_time
+Rule 43    identifier -> ID
+
+Terminals, with rules where they appear
+
+ARG_SEPARATOR        : 33
+ARG_SPECIFIER        : 29 31 32
+ASSIGN               : 21
+DATE                 : 31 32 39
+DELIMITER            : 3 4
+EQUAL                : 15
+FILE                 : 27 28
+FUNC                 : 29 30
+GE                   : 20
+GT                   : 19
+ID                   : 43
+INTEGER              : 32 36
+LE                   : 18
+LIKE                 : 22
+LPAREN               : 25 26
+LT                   : 17
+NEGATION             : 12
+NEQUAL               : 16
+REAL                 : 37
+REGEXP               : 23
+RPAREN               : 25 26
+STRING               : 22 23 38
+TIME                 : 31 40
+TYPE_CAST            : 25 26
+error                : 
+
+Nonterminals, with rules where they appear
+
+ambigous_node        : 11
+args                 : 29 33
+attr_node            : 10
+cast_part_node       : 7 24
+date_time            : 42
+file_node            : 8
+func_arg             : 15 16 17 18 19 20 21 24 33 34
+func_node            : 13 26 28
+identifier           : 12 13 14 15 16 17 18 19 20 21 22 23 35
+path_node            : 5 7
+path_part            : 1 2
+path_part_node       : 3
+subpath              : 1 0
+tag_node             : 9
+type_casted_node     : 6
+type_casted_value    : 41
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . subpath
+    (1) subpath -> . subpath path_part
+    (2) subpath -> . path_part
+    (3) path_part -> . DELIMITER path_part_node
+    (4) path_part -> . DELIMITER
+
+    DELIMITER       shift and go to state 1
+
+    subpath                        shift and go to state 2
+    path_part                      shift and go to state 3
+
+state 1
+
+    (3) path_part -> DELIMITER . path_part_node
+    (4) path_part -> DELIMITER .
+    (5) path_part_node -> . path_node
+    (6) path_part_node -> . type_casted_node
+    (8) path_node -> . file_node
+    (9) path_node -> . tag_node
+    (10) path_node -> . attr_node
+    (11) path_node -> . ambigous_node
+    (7) type_casted_node -> . cast_part_node path_node
+    (27) file_node -> . FILE
+    (28) file_node -> . FILE func_node
+    (14) tag_node -> . identifier
+    (15) attr_node -> . identifier EQUAL func_arg
+    (16) attr_node -> . identifier NEQUAL func_arg
+    (17) attr_node -> . identifier LT func_arg
+    (18) attr_node -> . identifier LE func_arg
+    (19) attr_node -> . identifier GT func_arg
+    (20) attr_node -> . identifier GE func_arg
+    (21) attr_node -> . identifier ASSIGN func_arg
+    (22) attr_node -> . identifier LIKE STRING
+    (23) attr_node -> . identifier REGEXP STRING
+    (12) ambigous_node -> . NEGATION identifier
+    (13) ambigous_node -> . identifier func_node
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+    (43) identifier -> . ID
+
+    DELIMITER       reduce using rule 4 (path_part -> DELIMITER .)
+    $end            reduce using rule 4 (path_part -> DELIMITER .)
+    FILE            shift and go to state 7
+    NEGATION        shift and go to state 14
+    LPAREN          shift and go to state 12
+    ID              shift and go to state 13
+
+    cast_part_node                 shift and go to state 15
+    path_node                      shift and go to state 8
+    path_part_node                 shift and go to state 4
+    tag_node                       shift and go to state 5
+    file_node                      shift and go to state 6
+    ambigous_node                  shift and go to state 11
+    type_casted_node               shift and go to state 9
+    attr_node                      shift and go to state 10
+    identifier                     shift and go to state 16
+
+state 2
+
+    (0) S' -> subpath .
+    (1) subpath -> subpath . path_part
+    (3) path_part -> . DELIMITER path_part_node
+    (4) path_part -> . DELIMITER
+
+    DELIMITER       shift and go to state 1
+
+    path_part                      shift and go to state 17
+
+state 3
+
+    (2) subpath -> path_part .
+
+    DELIMITER       reduce using rule 2 (subpath -> path_part .)
+    $end            reduce using rule 2 (subpath -> path_part .)
+
+
+state 4
+
+    (3) path_part -> DELIMITER path_part_node .
+
+    DELIMITER       reduce using rule 3 (path_part -> DELIMITER path_part_node .)
+    $end            reduce using rule 3 (path_part -> DELIMITER path_part_node .)
+
+
+state 5
+
+    (9) path_node -> tag_node .
+
+    DELIMITER       reduce using rule 9 (path_node -> tag_node .)
+    $end            reduce using rule 9 (path_node -> tag_node .)
+
+
+state 6
+
+    (8) path_node -> file_node .
+
+    DELIMITER       reduce using rule 8 (path_node -> file_node .)
+    $end            reduce using rule 8 (path_node -> file_node .)
+
+
+state 7
+
+    (27) file_node -> FILE .
+    (28) file_node -> FILE . func_node
+    (29) func_node -> . FUNC ARG_SPECIFIER args
+    (30) func_node -> . FUNC
+
+    DELIMITER       reduce using rule 27 (file_node -> FILE .)
+    $end            reduce using rule 27 (file_node -> FILE .)
+    FUNC            shift and go to state 19
+
+    func_node                      shift and go to state 18
+
+state 8
+
+    (5) path_part_node -> path_node .
+
+    DELIMITER       reduce using rule 5 (path_part_node -> path_node .)
+    $end            reduce using rule 5 (path_part_node -> path_node .)
+
+
+state 9
+
+    (6) path_part_node -> type_casted_node .
+
+    DELIMITER       reduce using rule 6 (path_part_node -> type_casted_node .)
+    $end            reduce using rule 6 (path_part_node -> type_casted_node .)
+
+
+state 10
+
+    (10) path_node -> attr_node .
+
+    DELIMITER       reduce using rule 10 (path_node -> attr_node .)
+    $end            reduce using rule 10 (path_node -> attr_node .)
+
+
+state 11
+
+    (11) path_node -> ambigous_node .
+
+    DELIMITER       reduce using rule 11 (path_node -> ambigous_node .)
+    $end            reduce using rule 11 (path_node -> ambigous_node .)
+
+
+state 12
+
+    (25) cast_part_node -> LPAREN . TYPE_CAST RPAREN
+    (26) cast_part_node -> LPAREN . TYPE_CAST func_node RPAREN
+
+    TYPE_CAST       shift and go to state 20
+
+
+state 13
+
+    (43) identifier -> ID .
+
+    DELIMITER       reduce using rule 43 (identifier -> ID .)
+    $end            reduce using rule 43 (identifier -> ID .)
+    EQUAL           reduce using rule 43 (identifier -> ID .)
+    NEQUAL          reduce using rule 43 (identifier -> ID .)
+    LT              reduce using rule 43 (identifier -> ID .)
+    LE              reduce using rule 43 (identifier -> ID .)
+    GT              reduce using rule 43 (identifier -> ID .)
+    GE              reduce using rule 43 (identifier -> ID .)
+    ASSIGN          reduce using rule 43 (identifier -> ID .)
+    LIKE            reduce using rule 43 (identifier -> ID .)
+    REGEXP          reduce using rule 43 (identifier -> ID .)
+    FUNC            reduce using rule 43 (identifier -> ID .)
+    ARG_SEPARATOR   reduce using rule 43 (identifier -> ID .)
+    RPAREN          reduce using rule 43 (identifier -> ID .)
+
+
+state 14
+
+    (12) ambigous_node -> NEGATION . identifier
+    (43) identifier -> . ID
+
+    ID              shift and go to state 13
+
+    identifier                     shift and go to state 21
+
+state 15
+
+    (7) type_casted_node -> cast_part_node . path_node
+    (8) path_node -> . file_node
+    (9) path_node -> . tag_node
+    (10) path_node -> . attr_node
+    (11) path_node -> . ambigous_node
+    (27) file_node -> . FILE
+    (28) file_node -> . FILE func_node
+    (14) tag_node -> . identifier
+    (15) attr_node -> . identifier EQUAL func_arg
+    (16) attr_node -> . identifier NEQUAL func_arg
+    (17) attr_node -> . identifier LT func_arg
+    (18) attr_node -> . identifier LE func_arg
+    (19) attr_node -> . identifier GT func_arg
+    (20) attr_node -> . identifier GE func_arg
+    (21) attr_node -> . identifier ASSIGN func_arg
+    (22) attr_node -> . identifier LIKE STRING
+    (23) attr_node -> . identifier REGEXP STRING
+    (12) ambigous_node -> . NEGATION identifier
+    (13) ambigous_node -> . identifier func_node
+    (43) identifier -> . ID
+
+    FILE            shift and go to state 7
+    NEGATION        shift and go to state 14
+    ID              shift and go to state 13
+
+    file_node                      shift and go to state 6
+    path_node                      shift and go to state 22
+    tag_node                       shift and go to state 5
+    ambigous_node                  shift and go to state 11
+    attr_node                      shift and go to state 10
+    identifier                     shift and go to state 16
+
+state 16
+
+    (14) tag_node -> identifier .
+    (15) attr_node -> identifier . EQUAL func_arg
+    (16) attr_node -> identifier . NEQUAL func_arg
+    (17) attr_node -> identifier . LT func_arg
+    (18) attr_node -> identifier . LE func_arg
+    (19) attr_node -> identifier . GT func_arg
+    (20) attr_node -> identifier . GE func_arg
+    (21) attr_node -> identifier . ASSIGN func_arg
+    (22) attr_node -> identifier . LIKE STRING
+    (23) attr_node -> identifier . REGEXP STRING
+    (13) ambigous_node -> identifier . func_node
+    (29) func_node -> . FUNC ARG_SPECIFIER args
+    (30) func_node -> . FUNC
+
+    DELIMITER       reduce using rule 14 (tag_node -> identifier .)
+    $end            reduce using rule 14 (tag_node -> identifier .)
+    EQUAL           shift and go to state 27
+    NEQUAL          shift and go to state 26
+    LT              shift and go to state 29
+    LE              shift and go to state 30
+    GT              shift and go to state 23
+    GE              shift and go to state 24
+    ASSIGN          shift and go to state 32
+    LIKE            shift and go to state 25
+    REGEXP          shift and go to state 31
+    FUNC            shift and go to state 19
+
+    func_node                      shift and go to state 28
+
+state 17
+
+    (1) subpath -> subpath path_part .
+
+    DELIMITER       reduce using rule 1 (subpath -> subpath path_part .)
+    $end            reduce using rule 1 (subpath -> subpath path_part .)
+
+
+state 18
+
+    (28) file_node -> FILE func_node .
+
+    DELIMITER       reduce using rule 28 (file_node -> FILE func_node .)
+    $end            reduce using rule 28 (file_node -> FILE func_node .)
+
+
+state 19
+
+    (29) func_node -> FUNC . ARG_SPECIFIER args
+    (30) func_node -> FUNC .
+
+    ARG_SPECIFIER   shift and go to state 33
+    RPAREN          reduce using rule 30 (func_node -> FUNC .)
+    DELIMITER       reduce using rule 30 (func_node -> FUNC .)
+    $end            reduce using rule 30 (func_node -> FUNC .)
+
+
+state 20
+
+    (25) cast_part_node -> LPAREN TYPE_CAST . RPAREN
+    (26) cast_part_node -> LPAREN TYPE_CAST . func_node RPAREN
+    (29) func_node -> . FUNC ARG_SPECIFIER args
+    (30) func_node -> . FUNC
+
+    RPAREN          shift and go to state 34
+    FUNC            shift and go to state 19
+
+    func_node                      shift and go to state 35
+
+state 21
+
+    (12) ambigous_node -> NEGATION identifier .
+
+    DELIMITER       reduce using rule 12 (ambigous_node -> NEGATION identifier .)
+    $end            reduce using rule 12 (ambigous_node -> NEGATION identifier .)
+
+
+state 22
+
+    (7) type_casted_node -> cast_part_node path_node .
+
+    DELIMITER       reduce using rule 7 (type_casted_node -> cast_part_node path_node .)
+    $end            reduce using rule 7 (type_casted_node -> cast_part_node path_node .)
+
+
+state 23
+
+    (19) attr_node -> identifier GT . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 45
+
+state 24
+
+    (20) attr_node -> identifier GE . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 46
+
+state 25
+
+    (22) attr_node -> identifier LIKE . STRING
+
+    STRING          shift and go to state 47
+
+
+state 26
+
+    (16) attr_node -> identifier NEQUAL . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 48
+
+state 27
+
+    (15) attr_node -> identifier EQUAL . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 49
+
+state 28
+
+    (13) ambigous_node -> identifier func_node .
+
+    DELIMITER       reduce using rule 13 (ambigous_node -> identifier func_node .)
+    $end            reduce using rule 13 (ambigous_node -> identifier func_node .)
+
+
+state 29
+
+    (17) attr_node -> identifier LT . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 50
+
+state 30
+
+    (18) attr_node -> identifier LE . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 51
+
+state 31
+
+    (23) attr_node -> identifier REGEXP . STRING
+
+    STRING          shift and go to state 52
+
+
+state 32
+
+    (21) attr_node -> identifier ASSIGN . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 53
+
+state 33
+
+    (29) func_node -> FUNC ARG_SPECIFIER . args
+    (33) args -> . args ARG_SEPARATOR func_arg
+    (34) args -> . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    args                           shift and go to state 54
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 55
+
+state 34
+
+    (25) cast_part_node -> LPAREN TYPE_CAST RPAREN .
+
+    INTEGER         reduce using rule 25 (cast_part_node -> LPAREN TYPE_CAST RPAREN .)
+    REAL            reduce using rule 25 (cast_part_node -> LPAREN TYPE_CAST RPAREN .)
+    STRING          reduce using rule 25 (cast_part_node -> LPAREN TYPE_CAST RPAREN .)
+    DATE            reduce using rule 25 (cast_part_node -> LPAREN TYPE_CAST RPAREN .)
+    TIME            reduce using rule 25 (cast_part_node -> LPAREN TYPE_CAST RPAREN .)
+    ID              reduce using rule 25 (cast_part_node -> LPAREN TYPE_CAST RPAREN .)
+    LPAREN          reduce using rule 25 (cast_part_node -> LPAREN TYPE_CAST RPAREN .)
+    FILE            reduce using rule 25 (cast_part_node -> LPAREN TYPE_CAST RPAREN .)
+    NEGATION        reduce using rule 25 (cast_part_node -> LPAREN TYPE_CAST RPAREN .)
+
+
+state 35
+
+    (26) cast_part_node -> LPAREN TYPE_CAST func_node . RPAREN
+
+    RPAREN          shift and go to state 56
+
+
+state 36
+
+    (37) func_arg -> REAL .
+
+    ARG_SEPARATOR   reduce using rule 37 (func_arg -> REAL .)
+    DELIMITER       reduce using rule 37 (func_arg -> REAL .)
+    $end            reduce using rule 37 (func_arg -> REAL .)
+    RPAREN          reduce using rule 37 (func_arg -> REAL .)
+
+
+state 37
+
+    (42) func_arg -> date_time .
+
+    ARG_SEPARATOR   reduce using rule 42 (func_arg -> date_time .)
+    DELIMITER       reduce using rule 42 (func_arg -> date_time .)
+    $end            reduce using rule 42 (func_arg -> date_time .)
+    RPAREN          reduce using rule 42 (func_arg -> date_time .)
+
+
+state 38
+
+    (38) func_arg -> STRING .
+
+    ARG_SEPARATOR   reduce using rule 38 (func_arg -> STRING .)
+    DELIMITER       reduce using rule 38 (func_arg -> STRING .)
+    $end            reduce using rule 38 (func_arg -> STRING .)
+    RPAREN          reduce using rule 38 (func_arg -> STRING .)
+
+
+state 39
+
+    (35) func_arg -> identifier .
+
+    ARG_SEPARATOR   reduce using rule 35 (func_arg -> identifier .)
+    DELIMITER       reduce using rule 35 (func_arg -> identifier .)
+    $end            reduce using rule 35 (func_arg -> identifier .)
+    RPAREN          reduce using rule 35 (func_arg -> identifier .)
+
+
+state 40
+
+    (24) type_casted_value -> cast_part_node . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 57
+
+state 41
+
+    (40) func_arg -> TIME .
+
+    ARG_SEPARATOR   reduce using rule 40 (func_arg -> TIME .)
+    DELIMITER       reduce using rule 40 (func_arg -> TIME .)
+    $end            reduce using rule 40 (func_arg -> TIME .)
+    RPAREN          reduce using rule 40 (func_arg -> TIME .)
+
+
+state 42
+
+    (39) func_arg -> DATE .
+    (31) date_time -> DATE . ARG_SPECIFIER TIME
+    (32) date_time -> DATE . ARG_SPECIFIER INTEGER
+
+    ARG_SEPARATOR   reduce using rule 39 (func_arg -> DATE .)
+    DELIMITER       reduce using rule 39 (func_arg -> DATE .)
+    $end            reduce using rule 39 (func_arg -> DATE .)
+    RPAREN          reduce using rule 39 (func_arg -> DATE .)
+    ARG_SPECIFIER   shift and go to state 58
+
+
+state 43
+
+    (36) func_arg -> INTEGER .
+
+    ARG_SEPARATOR   reduce using rule 36 (func_arg -> INTEGER .)
+    DELIMITER       reduce using rule 36 (func_arg -> INTEGER .)
+    $end            reduce using rule 36 (func_arg -> INTEGER .)
+    RPAREN          reduce using rule 36 (func_arg -> INTEGER .)
+
+
+state 44
+
+    (41) func_arg -> type_casted_value .
+
+    ARG_SEPARATOR   reduce using rule 41 (func_arg -> type_casted_value .)
+    DELIMITER       reduce using rule 41 (func_arg -> type_casted_value .)
+    $end            reduce using rule 41 (func_arg -> type_casted_value .)
+    RPAREN          reduce using rule 41 (func_arg -> type_casted_value .)
+
+
+state 45
+
+    (19) attr_node -> identifier GT func_arg .
+
+    DELIMITER       reduce using rule 19 (attr_node -> identifier GT func_arg .)
+    $end            reduce using rule 19 (attr_node -> identifier GT func_arg .)
+
+
+state 46
+
+    (20) attr_node -> identifier GE func_arg .
+
+    DELIMITER       reduce using rule 20 (attr_node -> identifier GE func_arg .)
+    $end            reduce using rule 20 (attr_node -> identifier GE func_arg .)
+
+
+state 47
+
+    (22) attr_node -> identifier LIKE STRING .
+
+    DELIMITER       reduce using rule 22 (attr_node -> identifier LIKE STRING .)
+    $end            reduce using rule 22 (attr_node -> identifier LIKE STRING .)
+
+
+state 48
+
+    (16) attr_node -> identifier NEQUAL func_arg .
+
+    DELIMITER       reduce using rule 16 (attr_node -> identifier NEQUAL func_arg .)
+    $end            reduce using rule 16 (attr_node -> identifier NEQUAL func_arg .)
+
+
+state 49
+
+    (15) attr_node -> identifier EQUAL func_arg .
+
+    DELIMITER       reduce using rule 15 (attr_node -> identifier EQUAL func_arg .)
+    $end            reduce using rule 15 (attr_node -> identifier EQUAL func_arg .)
+
+
+state 50
+
+    (17) attr_node -> identifier LT func_arg .
+
+    DELIMITER       reduce using rule 17 (attr_node -> identifier LT func_arg .)
+    $end            reduce using rule 17 (attr_node -> identifier LT func_arg .)
+
+
+state 51
+
+    (18) attr_node -> identifier LE func_arg .
+
+    DELIMITER       reduce using rule 18 (attr_node -> identifier LE func_arg .)
+    $end            reduce using rule 18 (attr_node -> identifier LE func_arg .)
+
+
+state 52
+
+    (23) attr_node -> identifier REGEXP STRING .
+
+    DELIMITER       reduce using rule 23 (attr_node -> identifier REGEXP STRING .)
+    $end            reduce using rule 23 (attr_node -> identifier REGEXP STRING .)
+
+
+state 53
+
+    (21) attr_node -> identifier ASSIGN func_arg .
+
+    DELIMITER       reduce using rule 21 (attr_node -> identifier ASSIGN func_arg .)
+    $end            reduce using rule 21 (attr_node -> identifier ASSIGN func_arg .)
+
+
+state 54
+
+    (29) func_node -> FUNC ARG_SPECIFIER args .
+    (33) args -> args . ARG_SEPARATOR func_arg
+
+    RPAREN          reduce using rule 29 (func_node -> FUNC ARG_SPECIFIER args .)
+    DELIMITER       reduce using rule 29 (func_node -> FUNC ARG_SPECIFIER args .)
+    $end            reduce using rule 29 (func_node -> FUNC ARG_SPECIFIER args .)
+    ARG_SEPARATOR   shift and go to state 59
+
+
+state 55
+
+    (34) args -> func_arg .
+
+    ARG_SEPARATOR   reduce using rule 34 (args -> func_arg .)
+    DELIMITER       reduce using rule 34 (args -> func_arg .)
+    $end            reduce using rule 34 (args -> func_arg .)
+    RPAREN          reduce using rule 34 (args -> func_arg .)
+
+
+state 56
+
+    (26) cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .
+
+    INTEGER         reduce using rule 26 (cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .)
+    REAL            reduce using rule 26 (cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .)
+    STRING          reduce using rule 26 (cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .)
+    DATE            reduce using rule 26 (cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .)
+    TIME            reduce using rule 26 (cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .)
+    ID              reduce using rule 26 (cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .)
+    LPAREN          reduce using rule 26 (cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .)
+    FILE            reduce using rule 26 (cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .)
+    NEGATION        reduce using rule 26 (cast_part_node -> LPAREN TYPE_CAST func_node RPAREN .)
+
+
+state 57
+
+    (24) type_casted_value -> cast_part_node func_arg .
+
+    DELIMITER       reduce using rule 24 (type_casted_value -> cast_part_node func_arg .)
+    $end            reduce using rule 24 (type_casted_value -> cast_part_node func_arg .)
+    ARG_SEPARATOR   reduce using rule 24 (type_casted_value -> cast_part_node func_arg .)
+    RPAREN          reduce using rule 24 (type_casted_value -> cast_part_node func_arg .)
+
+
+state 58
+
+    (31) date_time -> DATE ARG_SPECIFIER . TIME
+    (32) date_time -> DATE ARG_SPECIFIER . INTEGER
+
+    TIME            shift and go to state 61
+    INTEGER         shift and go to state 60
+
+
+state 59
+
+    (33) args -> args ARG_SEPARATOR . func_arg
+    (35) func_arg -> . identifier
+    (36) func_arg -> . INTEGER
+    (37) func_arg -> . REAL
+    (38) func_arg -> . STRING
+    (39) func_arg -> . DATE
+    (40) func_arg -> . TIME
+    (41) func_arg -> . type_casted_value
+    (42) func_arg -> . date_time
+    (43) identifier -> . ID
+    (24) type_casted_value -> . cast_part_node func_arg
+    (31) date_time -> . DATE ARG_SPECIFIER TIME
+    (32) date_time -> . DATE ARG_SPECIFIER INTEGER
+    (25) cast_part_node -> . LPAREN TYPE_CAST RPAREN
+    (26) cast_part_node -> . LPAREN TYPE_CAST func_node RPAREN
+
+    INTEGER         shift and go to state 43
+    REAL            shift and go to state 36
+    STRING          shift and go to state 38
+    DATE            shift and go to state 42
+    TIME            shift and go to state 41
+    ID              shift and go to state 13
+    LPAREN          shift and go to state 12
+
+    date_time                      shift and go to state 37
+    identifier                     shift and go to state 39
+    cast_part_node                 shift and go to state 40
+    type_casted_value              shift and go to state 44
+    func_arg                       shift and go to state 62
+
+state 60
+
+    (32) date_time -> DATE ARG_SPECIFIER INTEGER .
+
+    DELIMITER       reduce using rule 32 (date_time -> DATE ARG_SPECIFIER INTEGER .)
+    $end            reduce using rule 32 (date_time -> DATE ARG_SPECIFIER INTEGER .)
+    ARG_SEPARATOR   reduce using rule 32 (date_time -> DATE ARG_SPECIFIER INTEGER .)
+    RPAREN          reduce using rule 32 (date_time -> DATE ARG_SPECIFIER INTEGER .)
+
+
+state 61
+
+    (31) date_time -> DATE ARG_SPECIFIER TIME .
+
+    DELIMITER       reduce using rule 31 (date_time -> DATE ARG_SPECIFIER TIME .)
+    $end            reduce using rule 31 (date_time -> DATE ARG_SPECIFIER TIME .)
+    ARG_SEPARATOR   reduce using rule 31 (date_time -> DATE ARG_SPECIFIER TIME .)
+    RPAREN          reduce using rule 31 (date_time -> DATE ARG_SPECIFIER TIME .)
+
+
+state 62
+
+    (33) args -> args ARG_SEPARATOR func_arg .
+
+    ARG_SEPARATOR   reduce using rule 33 (args -> args ARG_SEPARATOR func_arg .)
+    DELIMITER       reduce using rule 33 (args -> args ARG_SEPARATOR func_arg .)
+    $end            reduce using rule 33 (args -> args ARG_SEPARATOR func_arg .)
+    RPAREN          reduce using rule 33 (args -> args ARG_SEPARATOR func_arg .)
+

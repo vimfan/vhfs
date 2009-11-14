@@ -1,0 +1,148 @@
+WYWOŁANIA FS API:
+
+============================================================
+  mkdir(path)
+============================================================
+
+ Semantyka:
+  Tworzy nową etykietę w hierarchii etykiet.
+
+ Argumenty:
+  Wywołanie jest możliwe, gdy ścieżka path jest postaci:
+
+  /e[0]/e[1]/ ... /e[n-2]/super_tag:[children]/new_subtag
+   
+  lub w postaci skróconej:
+
+  /e[0]/e[1]/ ... /element[n-2]/super_tag:/new_subtag
+
+  super_tag jest etykietą - rodzicem etykiety new_subtag
+  super_tag może być pustym ciągiem znaków, wówczas utworzona 
+  zostanie etykieta pierwszego rzędu (jeśli nie istnieje)
+
+  Wszystkie elementy e[i] dla 0 < i < n - 1, jeśli są postaci:
+  
+  /{tag_name} 
+
+  muszą należeć do tego samego poddrzewa etykiet i dodatkowo 
+  zawsze spełniona jest relacja: e[i] jest przodkiem e[j] dla i < j. 
+  Reszta elementów ścieżki jest ze względów wygodniejszej pracy 
+  z drzewem etykiet ignorowana. 
+
+============================================================
+  rmdir(path)
+============================================================
+ 
+  zasady identyczne jak przy mkdir oprócz tego, że jeśli 
+  ścieżka jest postaci:
+  
+  /e[0]/e[1]/ ... /e[n-2]/super_tag:[children]/subtag_to_remove
+
+  to etykieta musi być jednoznacznie określona (na pewno?)
+  inaczej pozwolimy na hurtowe usuwanie ścieżek, co raczej 
+  nie jest pożądane
+
+============================================================
+  rename(path, path2)
+============================================================
+
+   path = /e[0]/e[1]/ ... /e[n-2]/super_tag:[children]/subtag 
+   path2 = /f[0]/f[1]/ ... /f[m-2]/super_tag2:[children]/subtag_after_rename
+
+ Semantyka:
+
+   Zmienia nazwę i pozycję etykiety.    
+
+   schemat działania: 
+   1. stworzyć nową etykietę
+   2. przypisać wszystkim plikom, które posiadały starą etykietę nowo utworzoną etykietę
+   3. usunąć starą etykietę
+   
+ PSEUDOKOD:
+
+   # uwaga na :limit = 0! 
+   path_alpha = /e[0]/e[1]/ ... /e[n-2]/super_tag/subtag/:limit 0
+   path_beta  = /f[0]/f[1]/ ... /f[m-2]/super_tag2/subtag_after_rename
+
+   mkdir(path_beta)
+   files = `ls path_alpha`
+   foreach files as f do:
+     ln -s path(f) path_beta
+   end
+   rmdir(path_alpha)
+
+   Można to zrobić wydajniej po prostu zmieniając nazwę taga (?)
+
+============================================================
+  symlink(src, dst)
+============================================================
+
+  src = /e[0]/e[1]/ ... /e[n-1]/file
+  dst = /f[0]/f[1]/ ... /f[m-1]/file2
+
+ Semantyka: 
+
+   Dodaje do indeksu plik określony przez ścieżkę src pod nazwą file2.
+
+   Wszyskie elementy ścieżki postaci:
+
+   /tagname powodują dodanie taga do pliku 
+   /attr = val powodują dodanie atrybutu i nadanie mu wartości 
+
+   Wszystkie elementy ścieżki nie spełniające tych wymogów są ignorowane.
+
+   Identyfikatory tagów są determinowane elementami ścieżki. Jeśli powstaje niejeznodnaczność 
+   (tzn. n tagów o identycznej nazwie odpowiada kryteriom ścieżki), to do pliku zostaje 
+   przyporządkowanych n identycznych co do nazwy tagów).
+
+   W nazwie file2 wszystkie wystąpienia ":" muszą być zastąpione czymś innym
+
+
+============================================================
+  getattr(path)
+============================================================
+
+errno.ENOENT:
+  
+  /tag_exists/tag_not_exists/
+  /tag_exists/attr_not_exists
+  ścieżka niepoprawna syntaktycznie
+
+============================================================
+  access(path)
+============================================================
+
+  rx gdy najbardziej znaczący element ścieżki jest postaci /tagname lub /attr = val
+  rwx gdy wskazujemy konkretnie plik /music/jazz/urbaniak_122.mp3
+  
+
+============================================================
+  unlink(path)
+============================================================
+
+  Sprawdza, czy ścieżka prowadzi do jakiegoś pliku. Jeśli tak, 
+  to usuwa wszystkie etykiety i atrybuty plikowi, które są podane w
+  ścieżce. 
+
+  UWAGA! 
+  Wg tej semantyki usunięcie pliku z indeksu może być czasochłonne.
+
+=========
+   W jaki sposób określane są poddrzewa?
+
+   /music/jazz/hip hop/nu-jazz - ścieżka pozwala określić dokładnie ściezki:
+            culture -> music -> jazz
+            culture -> music -> hip hop
+            culture -> music -> nu-jazz
+
+Ciekawy przypadek:
+Chcemy oetykietować teledysk jazzowy, którego bohaterowie są artystami disco polo. Zależy nam
+na etykietowaniu faktu specyficznego ubioru występujących (ubiór charakterystyczny dla 
+artystów disco polo).
+
+ln -s movie.avi /vhfs/music/jazz/culture/fashion/disco polo
+
+co zrobić aby plik nie był zakwalifikowany do rodzaju muzyki disco polo. Można to zrobić wykonując dwie operacje:
+ln -s movie.avi /vhfs/music/jazz
+ln -s movie.avi /vhfs/culture/fashion/disco polo
+

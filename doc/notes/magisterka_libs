@@ -1,0 +1,5 @@
+python-sqlite
+python-sqlobject
+python-inotify
+python-fuse
+ply

@@ -1,0 +1,38 @@
+===================================================
+
+normalny tryb przeglądania plików oraz ich właściwości (czyli atrybutów i etykiet)
+cd /@music/@jazz/@bitrate=128
+ls ./
+plik1 plik2 plik3
+mkdir persmission denied
+ln -s /home/plik/jakis.mp3 ./ # tworzy nowy plik, nadaje mu etykiety: music i jazz oraz atrybut bitrate z wartością 128, 
+			      # oprócz tego wypełnia atrybuty wbudowane w plik (w tej chwili tylko name i path)
+
+katalogi muszą być do odczytu i zapisu, mimo to mkdir musi zwracac blad
+
+===================================================
+
+tryb edycji tagów:
+/@Tag.tree/ == /@Tag./ == /@Tag.default czyli faktycznie (/@Tag.class_default, /@Tag.class_tree)
+ls ./ # zwraca tagi bez rodzica (tagi pierwszego rzędu)
+ln -s /home/plik/jakis.mp3 ./ # operacja niedozwolona
+mkdir nazwa # tworzy taga pierwszego rzędu 
+
+cd music
+mkdir ambient # tworzy podetykietę music o nazwie ambient
+ls ./
+jazz rock ambient disco_polo
+
+rmdir ambient # usuwa etykietę
+
+UWAGA! W tym trybie brak funkcji przy nazwie etykiety oznacza funkcję o naziwe 'children', a nie 'has'
+
+===================================================
+
+tryb edycji atrybutów:
+/@Attribute.all/
+ln -s /home/plik/jakis.mp3 ./ # operacja niedozwolona
+
+UWAGA! W tym trybie brak funkcji przy nazwie etykiety oznacza funkcję o naziwe 'children', a nie 'has'
+
+================================================

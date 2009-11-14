@@ -1,0 +1,66 @@
+{\rtf1\ansi\ansicpg1250\deff0
+{\fonttbl
+{\f0\fnil\fcharset0\fprq0\fttruetype Nimbus Sans L;}
+{\f1\fnil\fcharset0\fprq0\fttruetype Symbol;}
+{\f2\fnil\fcharset0\fprq0\fttruetype Times New Roman;}
+{\f3\fnil\fcharset0\fprq0\fttruetype Dingbats;}
+{\f4\fnil\fcharset0\fprq0\fttruetype Courier New;}}
+{\colortbl
+\red0\green0\blue0;
+\red255\green255\blue255;
+\red255\green255\blue0;}
+{\stylesheet
+{\s1\fi-431\li720\sbasedon28\snext28Contents 1;}
+{\s2\fi-431\li1440\sbasedon28\snext28Contents 2;}
+{\s3\fi-431\li2160\sbasedon28\snext28Contents 3;}
+{\s8\fi-431\li720\sbasedon28Lower Roman List;}
+{\s5\tx431\sbasedon24\snext28Numbered Heading 1;}
+{\s6\tx431\sbasedon25\snext28Numbered Heading 2;}
+{\s7\fi-431\li720Square List;}
+{\*\cs11\sbasedon28Endnote Text;}
+{\s4\fi-431\li2880\sbasedon28\snext28Contents 4;}
+{\s9\fi-431\li720Diamond List;}
+{\s10\fi-431\li720Numbered List;}
+{\*\cs12\fs20\superEndnote Reference;}
+{\s13\fi-431\li720Triangle List;}
+{\s14\tx431\sbasedon26\snext28Numbered Heading 3;}
+{\s15\fi-431\li720Dashed List;}
+{\s16\fi-431\li720\sbasedon10Upper Roman List;}
+{\s17\sb440\sa60\f0\fs24\b\sbasedon28\snext28Heading 4;}
+{\s18\fi-431\li720Heart List;}
+{\s34\fi-431\li720Box List;}
+{\s20\fi-431\li720\sbasedon10Upper Case List;}
+{\s21\fi-431\li720Bullet List;}
+{\s22\fi-431\li720Hand List;}
+{\*\cs23\fs20\sbasedon28Footnote Text;}
+{\s24\sb440\sa60\f0\fs34\b\sbasedon28\snext28Heading 1;}
+{\s25\sb440\sa60\f0\fs28\b\sbasedon28\snext28Heading 2;}
+{\s19\qc\sb240\sa120\f0\fs32\b\sbasedon28\snext28Contents Header;}
+{\s27\fi-431\li720Tick List;}
+{\s26\sb440\sa60\f0\fs24\b\sbasedon28\snext28Heading 3;}
+{\s29\fi-431\li720\sbasedon10Lower Case List;}
+{\s30\li1440\ri1440\sa120\sbasedon28Block Text;}
+{\s36\f4\sbasedon28Plain Text;}
+{\s32\tx1584\sbasedon5\snext28Section Heading;}
+{\s33\fi-431\li720Implies List;}
+{\s28\f2\fs24Normal;}
+{\s35\fi-431\li720Star List;}
+{\*\cs31\fs20\superFootnote Reference;}
+{\s37\tx1584\sbasedon5\snext28Chapter Heading;}}
+{\*\listtable
+{\list\listtemplateid1003\listsimple{\listlevel\levelnfc23\levelstartat0\levelspace0\levelfollow0\fi-431\li720{\leveltext\'01\'b7 ;}{\levelnumbers;}\f1}\listid2}
+{\list\listtemplateid1004\listsimple{\listlevel\levelnfc23\levelstartat0\levelspace0\levelfollow0\fi-431\li720{\leveltext\'01\'b7 ;}{\levelnumbers;}\f1}\listid1}}
+{\*\listoverridetable
+{\listoverride\listoverridecount0\listid2\levelnfc23\levelstartat0\levelspace0\levelfollow0\fi-431\li720{\leveltext\'01\'b7 ;}{\levelnumbers;}\f1\ls1}
+{\listoverride\listoverridecount0\listid1\levelnfc23\levelstartat0\levelspace0\levelfollow0\fi-431\li720{\leveltext\'01\'b7 ;}{\levelnumbers;}\f1\ls2}}
+
+\kerning0\cf0\ftnbj\fet2\ftnstart1\ftnnar\aftnnar\ftnstart1\aftnstart1\aenddoc\revprop3{\info\uc1}\deftab720\viewkind1\paperw11905\paperh16837\margl1440\margr1440\widowctrl
+\sectd\sbknone\colsx360\pgncont\ltrsect
+\pard\plain\ltrpar\ql\s28\itap0{\s28\f2\fs24\lang1045{\*\listtag0}\par}
+{\listtext\pard\fi-431\li720\sb440\sa60\bullet 	}\pard\plain{\ltrpar\ql\fi-431\li720\sb440\sa60\s25{\*\abilist\abilistid1\abilistparentid0\abilistlevel1\abistartat0{\abifieldfont Symbol}{\abilistdecimal .}{\abilistdelim %L}{\abiliststyle Bullet List}}{\*\pn\pnql\pnstart0\pnlvlblt{\pntxtb\bullet}}\ls2\ilvl0\itap0{\s25\f0\fs28\b\lang1045{\*\listtag0}\abinodiroverride\ltrch Situations Where Another RDBMS May Work Better}{\s25\f0\fs28\b\lang1045{\*\listtag1000}\par}
+}{\listtext\pard\fi-431\li720\bullet 	}\pard\plain{\ltrpar\ql\fi-431\li720\s28{\*\abilist\abilistid2\abilistparentid0\abilistlevel1\abistartat0{\abifieldfont Symbol}{\abilistdecimal .}{\abilistdelim %L}{\abiliststyle Bullet List}}{\*\pn\pnql\pnstart0\pnlvlblt{\pntxtb\bullet}}\ls1\ilvl0\itap0{\s28\f2\fs24\b\lang1045{\*\listtag0}\abinodiroverride\ltrch Client/Server Applications\line If you have many client programs accessing a common database over a network, you should consider using a client/server database engine instead of SQLite. SQLite will work over a network filesystem, but because of the latency associated with most network filesystems, performance will not be great. Also, the file locking logic of many network filesystems implementation contains bugs (on both Unix and Windows). If file locking does not work like it should, it might be possible for two or more client programs to modify the same part of the same database at the same time, resulting in database corruption. Because this problem results from bugs in the underlying filesystem implementation, there is nothing SQLite can do to prevent it. \line A good rule of thumb is that you should avoid using SQLite in situations where the same database will be accessed simultaneously from many computers over a network filesystem. }{\s28\f2\fs24\lang1045{\*\listtag0}\par}
+}{\listtext\pard\fi-431\li720\bullet 	}\pard\plain{\ltrpar\ql\fi-431\li720\s28{\*\abilist\abilistid2\abilistparentid0\abilistlevel1\abistartat0{\abifieldfont Symbol}{\abilistdecimal .}{\abilistdelim %L}{\abiliststyle Bullet List}}{\*\pn\pnql\pnstart0\pnlvlblt{\pntxtb\bullet}}\ls1\ilvl0\itap0{\s28\f2\fs24\b\lang1045{\*\listtag0}\abinodiroverride\ltrch High-volume Websites \line SQLite will normally work fine as the database backend to a website. But if you website is so busy that you are thinking of splitting the database component off onto a separate machine, then you should definitely consider using an enterprise-class client/server database engine instead of SQLite. }{\s28\f2\fs24\b\lang1045{\*\listtag0}\par}
+}{\listtext\pard\fi-431\li720\bullet 	}\pard\plain{\ltrpar\ql\fi-431\li720\s28{\*\abilist\abilistid2\abilistparentid0\abilistlevel1\abistartat0{\abifieldfont Symbol}{\abilistdecimal .}{\abilistdelim %L}{\abiliststyle Bullet List}}{\*\pn\pnql\pnstart0\pnlvlblt{\pntxtb\bullet}}\ls1\ilvl0\itap0{\s28\cb2\highlight2\f2\fs24\b\lang1045{\*\listtag0}\abinodiroverride\ltrch Very large datasets  - potencjalnie jedyny problem}{\s28\f2\fs24\b\lang1045{\*\listtag0}\line When you start a transaction in SQLite (which happens automatically before any write operation that is not within an explicit BEGIN...COMMIT) the engine has to allocate a bitmap of dirty pages in the disk file to help it manage its rollback journal. SQLite needs 256 bytes of RAM for every 1MiB of database (assuming a 1024-byte page size: less memory is used with larger page sizes, of course). For smaller databases, the amount of memory required is not a problem, but when database begins to grow into the multi-gigabyte range, the size of the bitmap can get quite large. If you need to store and modify more than a few dozen GB of data, you should consider using a different database engine. }{\s28\f2\fs24\b\lang1045{\*\listtag0}\par}
+}{\listtext\pard\fi-431\li720\bullet 	}\pard\plain{\ltrpar\ql\fi-431\li720\s28{\*\abilist\abilistid2\abilistparentid0\abilistlevel1\abistartat0{\abifieldfont Symbol}{\abilistdecimal .}{\abilistdelim %L}{\abiliststyle Bullet List}}{\*\pn\pnql\pnstart0\pnlvlblt{\pntxtb\bullet}}\ls1\ilvl0\itap0{\s28\f2\fs24\b\lang1045{\*\listtag0}\abinodiroverride\ltrch High Concurrency \line SQLite uses reader/writer locks on the entire database file. That means if any process is reading from any part of the database, all other processes are prevented from writing any other part of the database. Similarly, if any one process is writing to the database, all other processes are prevented from reading any other part of the database. For many situations, this is not a problem. Each application does its database work quickly and moves on, and no lock lasts for more than a few dozen milliseconds. But there are some applications that require more concurrency, and those applications may need to seek a different solution. }{\s28\f2\fs24\b\lang1045{\*\listtag0}\par}
+}{\listtext\pard\fi-431\li720\bullet 	}\pard\plain{\ltrpar\ql\fi-431\li720\s28{\*\abilist\abilistid2\abilistparentid0\abilistlevel1\abistartat0{\abifieldfont Symbol}{\abilistdecimal .}{\abilistdelim %L}{\abiliststyle Bullet List}}{\*\pn\pnql\pnstart0\pnlvlblt{\pntxtb\bullet}}\ls1\ilvl0\itap0{\s28\f2\fs24\b\lang1045{\*\listtag1001}\par}
+}{\listtext\pard\fi-431\li720\bullet 	}\pard\plain{\ltrpar\ql\fi-431\li720\s28{\*\abilist\abilistid2\abilistparentid0\abilistlevel1\abistartat0{\abifieldfont Symbol}{\abilistdecimal .}{\abilistdelim %L}{\abiliststyle Bullet List}}{\*\pn\pnql\pnstart0\pnlvlblt{\pntxtb\bullet}}\ls1\ilvl0\itap0{\s28\f2\fs24\b\lang1045{\*\listtag1002}\par}}}

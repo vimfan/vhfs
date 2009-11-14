@@ -1,0 +1,102 @@
+ściężka składa się z węzłów,
+mamy PathResolver, który powinien nazywać się PathInterpreter
+
+class Context:
+	def __init__(self):
+		self.files_query = None # later: File.query
+		self.attributes_query = None # later: Attribute.query
+		self.tag_query = None # later: Tag.query
+	sys_call_name (operation)
+	path
+	times (utime)
+	flags (access)
+	mode (mknod, mkdir)
+	rdev (mknod)
+	
+	
+
+1. Zmienić nazwę PathResolver na PathInterpreter
+2. Każda operacja w vhfs.py powinna wyglądać tak (schemat):
+
+def readdir(self, path, offset, dh)
+	fields = {
+		OPERATION : 'readdir',
+		PATH      : path,
+		MODE      : mode,
+		TIMES     : times
+	}
+	context = Context(fields)
+	try:
+		items = PathInterpreter(c)
+		for item in items:
+			yield fuse.Direntry(str(dir))
+	except VHFSException, e:
+		logging.debug(ble)
+		return e.err_code
+	return 0
+	
+3. PathInterpreter wykonuje:
+
+	0. Analize składniowa (jednej lub dwóch ścieżek)
+	1. Rzutowania (resolve type hints, w jednej lub dwóch ścieżkach)
+	2. Rozstrzyga z jakim typem węzła ma do czynienia jeśli są niejednoznaczności
+	3. Z uwzględnieniem pola Context.OPERATION:
+		3.1 Filtruje nieistotne węzły (np. zostawia tylko ostatni węzeł plikowy)
+		3.2 Sortuje węzły
+                3.3 Dodaje węzeł (węzły) InterpreterHelperNode
+	4. Wywołuje na każdym węźle node.interpret(context) operacje, która modyfikuje kontekst
+	5. Wykonuje return Context.output
+
+	przykłady: 
+
+	readdir - ok
+	getattr - dodaje węzeł, który jako interpret ma funkcję sprawdzającą wystąpienie flag / warunków w Context:
+			* sortowanie ustawia jako pierwszy element ostatni węzeł typu FileNode (pozostałe tego typu usuwa)
+			* węzły typu tag i attribute ustawiają flagę istnienia elementów o odpowiednich identyfikatorach
+				w przypadku atrybutów może być też sprawdzany typ atrybutu, jeśli etykiety ze ścieżki nie
+				ma w bazie, to ustawiona jest flaga w Context z powodu której dalsze węzły nie będą nawet 
+				sprawdzane
+			* (konieczne??) sprawdzane są zależności rodzic - dziecko
+	
+	access - ok
+
+	mkdir - dodaje węzeł InterpreterHelperNode, który tworzy nowy Tag (lub nie)
+			basename(path) = @nazwa, 
+			* na pewno sprawdzana jest zależność rodzic - dziecko
+			* jeśli istotne są tylko dwa ostatnie węzły, to resztę można odfiltrować
+	rmdir - usuwa etykietę z indeksu (podetykietę), usuwa atrybuty i etykiety jednego pliku
+			* na pewno sprawdzana jest zależność rodzic - dziecko
+			* jeśli istotne są tylko dwa ostatnie węzły, to resztę można odfiltrować
+			* dzięki rmdir można usuwać też etykiety i atrybuty pliku:
+				rmdir urbaniak.i3.mp3./@music
+				rmdir urbaniak.i3.mp3./@bitrate=128
+
+	rename(path, path2)
+		trzy przypadki:
+			* zmiana nazwy pliku (i położenia): 
+				mv /@music/@jazz/urbaniak.i3.mp3 /@favourite/urbaniak.mp3
+				* path2 moze byc niepoprawny syntaktycznie jesli chodzi o ostatni element
+			* zmiana nazwy etykiety (i położenia):
+				mv /@music./@hip-hop /@culture./@hiphop
+				* path i path2 muszą być poprawne syntaktycznie i relacja rodzic - dziecko musi być zachowana
+			* zmiana nazwy atrybutu (??):
+				mv /@a.name /@b.name
+				* może lepiej usunąć atrybut
+
+			wszystkie elementy NamespaceNode mogą być usunięte z obydwóch ścieżek (path, path2)
+			
+			
+	symlink(src, dst)
+		* src nie jest parsowane
+		* ostatni element ścieżki dst nie musi być syntaktycznie poprawny 
+			i będzie przetworzony na poprawny:
+			* urbaniak.mp3 na urbaniak.i0.mp3
+			* README na README.0
+			* plik.i34 w zależności od tego, czy src jest w obrębie systemu plików:
+				plik.i34.i0 (jeśli jest poza obrębem) lub (plik.i34 jeśli jest w obrębie)
+		* wszystkie elementy typu: @tag[.func]/@attr:=val/@attr2=val/@attr3.equal:val/@attr4.assign:val dodają 
+			atrybuty i etykiety plikowi
+			
+
+4. Metoda interpret(context) powinna być implementowana przez podklasy node.
+

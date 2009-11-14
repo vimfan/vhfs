@@ -1,0 +1,27 @@
+ls /@tag.any/@attribute.any/@name.like 'ble%' - tutaj name jest przestrzenią nazw (namespace)
+
+@Func.limit:10
+
+q = File.query()
+q.filter(File.name.like('ble%'))
+
+
+=================================
+ls /@tag.like:'mu%'
+
+Tag.query()
+q.filter(Tag.name.like(
+
+================================
+ls /@attribute.key_like:'bitr%'
+ls /@attribute.value_like:'u2%'
+
+
+
+/@costam - zawsze TagNode (!), ważne, bo w ten sposób można definiować dowolne tagi
+
+namespacy trzeba rozpoznawać po nazwach funkcji (metod)
+
+ls /@tag.has_any
+
+/@Tag.like:@
