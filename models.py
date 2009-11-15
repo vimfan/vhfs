@@ -4,13 +4,11 @@ from sqlalchemy.sql import and_, or_, not_
 
 import os
 
-NAMESPACE_METHOD_PREFIX = '_class_'
-
-class Namespace:
-    def repr(self):
+class EntityExt:
+    def _repr(self):
         return ('<# %s' % self.___class__.__name__) + ' = ' + `self.to_dict()` + ' #>'
     
-class Tag(Entity, Namespace):
+class Tag(Entity, EntityExt):
     name = Field(Unicode(50))
 
     files = ManyToMany('File')
@@ -18,27 +16,36 @@ class Tag(Entity, Namespace):
     children_ = OneToMany('Tag')
 
     def __repr__(self):
-        return super(Tag, self).repr() 
+        return super(Tag, self)._repr() 
 
-
-class Attribute(Entity, Namespace):
+class Attribute(Entity, EntityExt):
     key = Field(Unicode(30))
     value = Field(Text)
     files = ManyToMany('File')
     
     def __repr__(self):
-        return super(Attribute, self).repr() 
+        return super(Attribute, self)._repr() 
 
-
-
-class File(Entity, Namespace):
+class File(Entity, EntityExt):
     path = Field(Unicode(255))
     name = Field(Unicode(255))
     tags = ManyToMany('Tag')
     attributes = ManyToMany('Attribute')
 
-    def __repr__(self):
-        return super(File, self).repr() 
+    def get_tag_by_name(self, name):
+        for t in self.tags:
+            if t.name == name:
+                return t
 
-class Func(Namespace):
-    pass
+    def get_attr_by_key(self, key):
+        for a in self.attributes:
+            if a.key == key:
+                return a
+
+    def get_attr_by_key_and_val(self, key, val):
+        for a in self.attributes:
+            if a.key == key and a.value == val:
+                return a
+
+    def __repr__(self):
+        return super(File, self)._repr() 

@@ -225,13 +225,13 @@ def p_attr_node(t):
                     | identifier REGEXP STRING
                     '''
     mapping = {
-        '>'      : 'greater_than',
-        '>='     : 'greater_or_equal',
-        '<'      : 'less_than',
-        '<='     : 'less_or_equal',
-        ':='     : 'assign',
-        EQUAL_   : 'equal',
-        NEQUAL_  : 'not_equal',
+        '>'      : 'gt',
+        '>='     : 'ge',
+        '<'      : 'lt',
+        '<='     : 'le',
+        ':='     : 'weq', # weak equal - if attribute didn't exists ignore condition
+        EQUAL_   : 'eq',
+        NEQUAL_  : 'neq',
         LIKE_    : 'like',
         REGEXP_  : 'regexp'
     }

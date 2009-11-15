@@ -52,17 +52,35 @@ class MetaDataManager(singleton.Singleton):
 
     def add_tag(self, tag):
         '''
-            Adds net tag to the index.
+            Adds new tag to the index.
+
+            @param tag: Tag instance to add.
+            @type tag: Tag
         '''
         if not self.get_tag(tag.name):
             self._tags.append(tag)
             self._tag_names.append(tag.name)
 
     def del_tag(self, tag):
+        '''
+            Removes tag from the index.
+
+            @param tag: Tag instance to remove 
+            @type tag: Tag
+        '''
         self._tags.remove(tag)
         self._tag_names.remove(tag.name)
 
     def rename_tag(self, old_tag, new_tag):
+        '''
+            Change the name of the tag given by old_tag to name given by new_tag
+
+            @param old_tag:
+            @type old_tag: str
+
+            @param new_tag:
+            @type new_tag: str
+        '''
         if not self.get_tag(old_tag.name):
             raise VHFSException('No tag %s in MetaDataManager' % old_tag)
         self._tags[self._tags.index(old_tag)] = new_tag

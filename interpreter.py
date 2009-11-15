@@ -1,19 +1,21 @@
-from datatypes.generic import *
-import models as m
 import copy
-import meta_data_manager
-import parser
 import re
 import logging
 import errno
 
+import models as m
+import meta_data_manager
+import parser
+import operations
+
 from nodes import *
+from datatypes.generic import *
 
 class Context(object):
     '''
     Context class definition.
 
-    Operation member must always be set to name of the operation by which
+    Operation member must always be set to the name of the operation by which
     interpreter is invoked.
 
     Allowed fields are now:
@@ -24,22 +26,22 @@ class Context(object):
 
     '''
     def __init__(self):
-        self.__properties = {}
-        self.__permitted_keys = [
+        self._properties = {}
+        self._permitted_keys = [
             # fuse implementation dependable fields
             'operation', 'path', 'path2', 'times', 
             'flags',     'mode', 'rdev',  'offset',
             # interpreter fields
             'steps_num', 'curr_step', 'next_step'
             # registry storage for use by interpreters
-            'registry'
+            'registry', 'query'
         ]
-        self.__properties['steps_num'] = 1
-        self.__properties['curr_step'] = 0
-        self.__initialized = True
+        self._properties['steps_num'] = 1
+        self._properties['curr_step'] = 0
+        self._initialized = True
 
     def __str__(self):
-        return '<# Context %s #>' % `self.__properties`
+        return '<# Context %s #>' % `self._properties`
 
     def __getattr__(self, item):
         try:
@@ -48,10 +50,10 @@ class Context(object):
             raise AttributeError(item)
 
     def __setattr__(self, item, value):
-        if not self.__dict__.has_key('_Context__initialized'):
+        if not self.__dict__.has_key('_initialized'):
             return object.__setattr__(self, item, value)
-        elif item in self.__permitted_keys:
-            self.__properties[item] = value
+        elif item in self._permitted_keys:
+            self._properties[item] = value
         else:
             raise AttributeError(item)
 
@@ -73,15 +75,16 @@ class Interpreter(IInterpreter):
     def eval(self):
         '''
             Performs parsing for at least one path (self.__context.path), and
-            if is second path (set self.__context.path. Invokes appropriate
-            interpreter at least one time.
+            if second path exists (set self.__context.path2) it invokes
+            appropriate interpreter at least one time.
         '''
         # PathNodeInterpreter implementation decides how many steps it needs,
         # so self.__context.steps_num may be changed by ivoked interpreter
         while self.__context.curr_step < self.__context.steps_num:
-            class_name = self.__context.operation.capitalize() + 'Interpreter'
-            interpreter = eval('%s(self.__context)' % class_name)
-            interpreter.eval()
+            #class_name = self.__context.operation.capitalize() + 'Interpreter'
+            #interpreter = eval('%s(self.__context)' % class_name)
+            #interpreter.eval()
+            interpreter = 
             self.__context.curr_step += 1
 
         return self.__context.out
@@ -161,6 +164,11 @@ class AbstractNodeInterpreter(IInterpreter):
     def __str__(self):
         return '<# %s (%s) #>' % (self.__class__.__name__, str(self.node))
 
+    def eval_children(self):
+        for node in self.children():
+            node_interpreter = NodeInterpreter(node)
+            node_interpreter.eval()
+
     node = property(lambda self: self._node)
     '''
     @ivar: Read only field
@@ -178,10 +186,10 @@ class NodeInterpreter(AbstractNodeInterpreter):
         super(NodeInterpreter, self).__init__(*arg, **kw)
 
     def eval(self):
-        interpreter_class_name = self.node.__class__.__name__ + 'Interpreter'
-        interpreter = eval('NodeInterpreter.%s(self.node, self.context)' %
-                            interpreter_class_name)
-        interpreter.eval()
+        interpreter_impl_class_name = self.node.__class__.__name__ + 'Interpreter'
+        interpreter_impl = eval('NodeInterpreter.%s(self.node, self.context)' %
+                            interpreter_impl_class_name)
+        interpreter_impl.eval()
 
     class PathNodeInterpreter(AbstractNodeInterpreter):
         
@@ -190,27 +198,32 @@ class NodeInterpreter(AbstractNodeInterpreter):
             #self._mdmgr = meta_data_manager.MetaDataManager.getInstance()
 
         def eval(self):
-            prefix = self.__class__.__name__
-            for child in self.children():
-                interpreter_class_name = child.__class__.__name__ + 'Interpreter'
-                interpreter = eval('%s(self.context, child)' % interpreter_class_name)
-                interpreter.eval()
+            self.eval_children()
 
     class NamespaceNodeInterpreter(AbstractNodeInterpreter):
         def eval(self):
             logging.debug('NamespaceNodeInterpreter')
+            self.eval_children()
 
     class TagNodeInterpreter(AbstractNodeInterpreter):
         def eval(self):
             logging.debug('TagNodeInterpreter')
+            self.eval_children()
+            operations.eval(Tag, self.node.name.value, 
+                self.node.func_node.name.value, *self.node.func_node.args)
+
 
     class AttributeNodeInterpreter(AbstractNodeInterpreter):
         def eval(self):
-            logging.debug('TagNodeInterpreter')
+            logging.debug('AttributeNodeInterpreter')
+            self.eval_children()
+            operations.eval(Attribute, self.node.name.value, 
+                        self.node.func_node.name, *self.node.func_node.args)
 
     class FileNodeInterpreter(AbstractNodeInterpreter):
         def eval(self):
             logging.debug('TagNodeInterpreter')
+            self.eval_children()
 
     class AmbigousNodeInterpreter(AbstractNodeInterpreter):
         def eval(self):
