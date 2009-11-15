@@ -178,11 +178,58 @@
 #l.append(0)
 #l[0] = 1
 
+registry = {}
+
+class SemanticEnum:
+    UNKNOWN            = 0
+    FILE_RESULT_FILTER = 1
+    SQL_FILTER         = 2
+    DIRENTRY_GENERATOR = 3
+    DIRENTRY_FILTER    = 4
+
+def deco(semantic_indicator = SemanticEnum.UNKNOWN):
+    decorator_name = 'semantic_' + str(semantic_indicator)
+    exec('''
+def %s(f):
+    import sys
+    import re
+    i = 1
+    trace = []
+    trace.insert(0, f.func_name)
+    while True:
+        stair = sys._getframe(i).f_code.co_name
+        if re.search("module", stair):
+            break
+        trace.insert(0, stair)
+        i += 1
+    func_name = ".".join(trace)
+    registry[func_name] = %s
+    return staticmethod(f)
+''' % (decorator_name, semantic_indicator))
+    return eval(decorator_name)
+
 class Test(object):
+
     def __init__(self):
         Test.Test2()
+
+    class Public:
+
+        @deco(SemanticEnum.FILE_RESULT_FILTER)
+        def bla():
+            print 'ble'
+
+        class Class:
+
+            @deco(SemanticEnum.FILE_RESULT_FILTER)
+            def example():
+                pass
+            
+
     class Test2:
         def __init__(self):
-            print 'Test2'
+            Test.Public.bla()
 
-Test()
+#Test()
+Test.Public.bla()
+print registry

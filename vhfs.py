@@ -293,7 +293,7 @@ class VHFS(fuse.Fuse):
         logging.info("readlink: %s" % path)
         file_basename = os.path.basename(path)
         f = File.get_by(name = file_basename)
-        if f == None:
+        if f is None:
             return -errno.EACCES
         return str(f.path)
 
@@ -307,7 +307,7 @@ class VHFS(fuse.Fuse):
             err  = None
             path = self.__prepare_path(path)
 
-            if len(path) < 2 or path[-2].func_node == None or \
+            if len(path) < 2 or path[-2].func_node is None or \
                 not path[-2].func_node.name in [UNSPECIFIED_SYM, 'children', 'default']:
                 raise VHFSException(msg="Second from the end node does not have correct method call", err_code = errno.EBADMSG)
 

@@ -136,7 +136,7 @@ class MetaDataManager(singleton.Singleton):
         dir_items  = []  
         file_items = []  
 
-        if isinstance(node, FileNode) and node.func_node == None:
+        if isinstance(node, FileNode) and node.func_node is None:
             raise VHFSException(msg="Last significant node points to the File %s" \
                       % node.name, err_code = errno.ENOTDIR)
 
@@ -149,7 +149,7 @@ class MetaDataManager(singleton.Singleton):
         logging.debug('func_name: %s, class_name: %s' % (func_name, class_name))
         func = eval('models.%s.get_operation_by_name(func_name)' % class_name)
 
-        if func != None and models.OpHelper.get_semantic(func) == models.OpHelper.RETURN_DIRS:
+        if func is not None and models.OpHelper.get_semantic(func) == models.OpHelper.RETURN_DIRS:
             dir_items = func(node.name, *(node.func_node.arg_list))
             dir_items = [t_ID[0] + item for item in dir_items]
         else:

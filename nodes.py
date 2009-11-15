@@ -70,7 +70,7 @@ class Node(object):
                      of an instance
             @rtype: str
         '''
-        return '%s%s' % (' ' + str(self.name), [' ' + str(self.func_node), ''][self.func_node == None])
+        return '%s%s' % (' ' + str(self.name), [' ' + str(self.func_node), ''][self.func_node is None])
 
     def __str__(self):
         injection = self._repr_injection()
@@ -107,11 +107,11 @@ class Node(object):
                     #or (hasattr(x, 'has_ancestors_of_type') 
                     #and x.has_ancestors_of_type(type)), self.children())) > 0
 
-    def ancestors_of_type(self, type):
+    def descendants_of_type(self, type):
         '''
-            Returns all this node ancestors of given type.
+            Returns all descendants of this node with given type.
 
-            @param type: Type of ancestors nodes.
+            @param type: Type of descendants nodes.
             @type type: Node subclassess
             @return: List of nodes of given type
             @rtype: list
@@ -119,15 +119,13 @@ class Node(object):
         if self.children() < 1:
             return []
 
-        ancestors = []
+        descendants = []
         queue = [self.children()[0]]
         while len(queue):
             n = queue.pop(0)
             if isinstance(n, type) and n <> self:
-                ancestors.append(n)
-            # @FIXME consider using nodes for overy node:
-            if hasattr(n, 'children'):
-                queue.extend(n.children()) 
+                descendants.append(n)
+            queue.extend(n.children()) 
         return ancestors
 
     def replace_children_node(self, old, new):
@@ -278,7 +276,7 @@ class PathNode(Node):
             @param node: Node
             @type node: Node
         '''
-        if position == None:
+        if position is None:
             self._nodes.append(node)
         else:
             self._nodes.insert(index, node)

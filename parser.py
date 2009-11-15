@@ -49,13 +49,10 @@ t_RPAREN        = r'}'
 # constants
 EQUAL_           = '='
 NEQUAL_          = '<>'
-NEGATION_        = 'negation'
+NEGATION_        = 'Private.negation'
 LIKE_            = 'like'
 REGEXP_          = 'regexp'
 UNSPECIFIED_SYM  = 'default'
-
-
-
 
 t_DELIMITER = r'/'
 t_ID        = r'@[a-zA-Z0-9][a-zA-Z0-9_]*' 

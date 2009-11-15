@@ -84,7 +84,7 @@ class Interpreter(IInterpreter):
             #class_name = self.__context.operation.capitalize() + 'Interpreter'
             #interpreter = eval('%s(self.__context)' % class_name)
             #interpreter.eval()
-            interpreter = 
+            interpreter = Interpreter(self.__context)
             self.__context.curr_step += 1
 
         return self.__context.out
@@ -241,9 +241,9 @@ class NodeInterpreter(AbstractNodeInterpreter):
                 if self.__mdmgr.is_only(self.node.name.value, cls_name):
                     new_node_type = eval(cls_name + 'Node')
 
-                if new_node_type == None:
+                if new_node_type is None:
 
-                    if node.func_node == None:
+                    if node.func_node is None:
                         new_node_type = TagNode
 
                     elif node.func_node.name != UNSPECIFIED_SYM:
