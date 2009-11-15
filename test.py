@@ -109,71 +109,80 @@
 
 
 
-class Test(object):
+#class Test(object):
 
-    def __setattr__(self, item, val):
-        print '%s %s ' % (str(item), str(val))
-        return object.__setattr__(self, item, val)
+    #def __setattr__(self, item, val):
+        #print '%s %s ' % (str(item), str(val))
+        #return object.__setattr__(self, item, val)
 
-    def allow_all():
-        return True
+    #def allow_all():
+        #return True
 
-    def test(self):
-        return filter(None, range(10))
+    #def test(self):
+        #return filter(None, range(10))
 
 #t = Test()
 #t.test()
 #setattr(t, 'ble', 'bli')
 #print t.ble
 
-from nodes import *
+#from nodes import *
 
-class NodeList(list):
+#class NodeList(list):
 
-    def __init__(self, l = [], parent = None):
-        for item in l:
-            self.append(item)
-        self.parent = parent
+    #def __init__(self, l = [], parent = None):
+        #for item in l:
+            #self.append(item)
+        #self.parent = parent
 
-    def __str__(self):
-        prepare = [str(i) for i in self]
-        return str(prepare)
+    #def __str__(self):
+        #prepare = [str(i) for i in self]
+        #return str(prepare)
 
-    def __prepare_value(self, value):
-        if (not isinstance(value, Node) and value <> None):
-            value = ValueNode(value)
-            value.parent = self.parent
-        return value
+    #def __prepare_value(self, value):
+        #if (not isinstance(value, Node) and value <> None):
+            #value = ValueNode(value)
+            #value.parent = self.parent
+        #return value
 
-    def __setitem__(self, i, value):
-        return super(NodeList, self).__setitem__(i, self.__prepare_value(value))
+    #def __setitem__(self, i, value):
+        #return super(NodeList, self).__setitem__(i, self.__prepare_value(value))
 
-    def __setslice__(self, i, j, y):
-        prepared = NodeList(y)
-        return super(NodeList, self).__setslice__(i, j, prepared)
+    #def __setslice__(self, i, j, y):
+        #prepared = NodeList(y)
+        #return super(NodeList, self).__setslice__(i, j, prepared)
         
 
-    def __iadd__(self, y):
-        prepared = NodeList(y)
-        return super(NodeList, self).__iadd__(i, j, prepared)
+    #def __iadd__(self, y):
+        #prepared = NodeList(y)
+        #return super(NodeList, self).__iadd__(i, j, prepared)
 
-    def __add__(self, y):
-        out = []
-        out.extend(self)
-        out.extend(NodeList(y))
-        return out
+    #def __add__(self, y):
+        #out = []
+        #out.extend(self)
+        #out.extend(NodeList(y))
+        #return out
 
-    def append(self, value):
-        return super(NodeList, self).append(self.__prepare_value(value))
+    #def append(self, value):
+        #return super(NodeList, self).append(self.__prepare_value(value))
 
-    def extend(self, y):
-        prepared = NodeList(y)
-        return super(NodeList, self).extend(prepared)
+    #def extend(self, y):
+        #prepared = NodeList(y)
+        #return super(NodeList, self).extend(prepared)
 
-    def insert(self, i, item):
-        return super(NodeList, self).insert(i, self.__prepare_value(item))
+    #def insert(self, i, item):
+        #return super(NodeList, self).insert(i, self.__prepare_value(item))
 
-l = NodeList()
-print l
-l.append(0)
-l[0] = 1
+#l = NodeList()
+#print l
+#l.append(0)
+#l[0] = 1
+
+class Test(object):
+    def __init__(self):
+        Test.Test2()
+    class Test2:
+        def __init__(self):
+            print 'Test2'
+
+Test()

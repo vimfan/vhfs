@@ -153,16 +153,21 @@ class AbstractNodeInterpreter(IInterpreter):
         @param node: Node to interpret.
         @type node: Node
         '''
-        self.__context = context
-        self.__node = node
+        self._context = context
+        self._node = node
+        self._metadata_mgr = MetaDataManager.get_instance()
 
-    node = property(lambda self: self.__node)
+
+    def __str__(self):
+        return '<# %s (%s) #>' % (self.__class__.__name__, str(self.node))
+
+    node = property(lambda self: self._node)
     '''
     @ivar: Read only field
     @type: C{Node}
     '''
 
-    context = property(lambda self: self.__context)
+    context = property(lambda self: self._context)
     '''
     @ivar: Read only field
     @type: C{Context}'''
@@ -178,44 +183,18 @@ class NodeInterpreter(AbstractNodeInterpreter):
                             interpreter_class_name)
         interpreter.eval()
 
-
-
     class PathNodeInterpreter(AbstractNodeInterpreter):
         
         def __init__(self, *arg, **kw):
             super(PathNodeInterpreter, self).__init__(*arg, **kw)
-            self._mdmgr = meta_data_manager.MetaDataManager.getInstance()
+            #self._mdmgr = meta_data_manager.MetaDataManager.getInstance()
 
         def eval(self):
             prefix = self.__class__.__name__
-            interpreter_class_name = self.context.operation.capitalize() + prefix
-            interpreter = eval('%s(self.context)')
-            interpreter.eval()
-
-        def _resolve_ambiguity_of_children_nodes(self, node):
-            '''
-            Resolves ambiguity of children nodes
-            '''
-            nodes = node.has_ancestors_of_type(AmbigousNode)
-            for node in nodes:
-                node.resolve_ambiguity()
-
-        def _resolve_hints_of_children_nodes(self):
-            pass
-         
-        def __str__(self):
-            return '<# PathNodeInterpreter (%s) #>' % `self.__path` 
-
-        def __getitem__(self, i):
-            return self.__path[i]
-
-        def __len__(self):
-            return len(self.__path)
-
-        def __reversed__(self):
-            return self.__path.__reversed__()
-
-
+            for child in self.children():
+                interpreter_class_name = child.__class__.__name__ + 'Interpreter'
+                interpreter = eval('%s(self.context, child)' % interpreter_class_name)
+                interpreter.eval()
 
     class NamespaceNodeInterpreter(AbstractNodeInterpreter):
         def eval(self):
@@ -234,7 +213,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
             logging.debug('TagNodeInterpreter')
 
     class AmbigousNodeInterpreter(AbstractNodeInterpreter):
-        def eval(self, node):
+        def eval(self):
             '''
             Resolves type of the given node by checking its operation and
             metadata information stored in database backend. In its parent node
@@ -243,12 +222,10 @@ class NodeInterpreter(AbstractNodeInterpreter):
             @param node: Node to resolve ambiguity
             @type node: AmbigousNode
             '''
-            n = node.name
             new_node_type = None
-
             possible_classes = ['Attribute', 'Tag', 'Namespace']
             for cls_name in possible_classes:
-                if self.__mdmgr.is_only(n, cls_name):
+                if self.__mdmgr.is_only(self.node.name.value, cls_name):
                     new_node_type = eval(cls_name + 'Node')
 
                 if new_node_type == None:
@@ -265,7 +242,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
                                 namespace = node.name
                             else:
                                 op_name = operation_name
-                            if self.__mdmgr.is_operation_of(op_name, namespace):
+                            if self._mdmgr.is_operation_of(op_name, namespace):
                                 new_node_type = eval(cls + 'Node')
                                 
                 if new_node_type == AttributeNode:
@@ -310,3 +287,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
                 exec 'import %s' % type_module
                 exec 'new_node = %s.cast("%s")' % (type_module + '.' + type_class, value)
             parent.replace_subnode(node, new_node)
+
+    class ValueNodeIntereter(AbstractNodeInterpreter):
+        def eval(self, node):
+            pass

@@ -7,10 +7,10 @@ from interpreter import *
 class MetaDataManager(singleton.Singleton):
 
     def __init__(self):
-        self.__tags       = None
-        self.__tag_names  = None
-        self.__attrs      = None
-        self.__attr_keys  = None
+        self._tags       = None
+        self._tag_names  = None
+        self._attrs      = None
+        self._attr_keys  = None
         self.__namespaces = []
         for name in dir(models):
             try:
@@ -25,46 +25,68 @@ class MetaDataManager(singleton.Singleton):
         self.refresh_tags()
         self.refresh_attrs()
 
+    @classmethod
+    def get_instance(cls):
+        '''
+            Wrapper to be convention valid.
+
+            @return: One and only MetaDataManager instance.
+            @rtype: MetaDataManager
+        '''
+        return MetaDataManager.getInstance(cls)
+
     def get_tag(self, name):
-        for tag in self.__tags:
+        '''
+            Returns tag instance which has given name.
+
+            @param name: Name of a tag
+            @type name: str
+
+            @return: Tag instance with given name
+            @rtype: Tag
+        '''
+        for tag in self._tags:
             if tag.name == name:
                 return tag
         return None
 
     def add_tag(self, tag):
+        '''
+            Adds net tag to the index.
+        '''
         if not self.get_tag(tag.name):
-            self.__tags.append(tag)
-            self.__tag_names.append(tag.name)
+            self._tags.append(tag)
+            self._tag_names.append(tag.name)
 
     def del_tag(self, tag):
-        self.__tags.remove(tag)
-        self.__tag_names.remove(tag.name)
+        self._tags.remove(tag)
+        self._tag_names.remove(tag.name)
 
     def rename_tag(self, old_tag, new_tag):
         if not self.get_tag(old_tag.name):
             raise VHFSException('No tag %s in MetaDataManager' % old_tag)
-        self.__tags[self.__tags.index(old_tag)] = new_tag
-        self.__tag_names[self.__tag_names.index(old_tag.name)] = new_tag.name
+        self._tags[self._tags.index(old_tag)] = new_tag
+        self._tag_names[self._tag_names.index(old_tag.name)] = new_tag.name
 
     def add_attr(self, attr):
         if not self.is_attribute(attr.key):
-            self.__attrs.append(attr)
-            self.__attr_keys.append(attr.key)
+            self._attrs.append(attr)
+            self._attr_keys.append(attr.key)
 
     def refresh_tags(self):
-        self.__tags      = models.Tag.query().all()
-        self.__tag_names = [t.name for t in self.__tags]
+        self._tags      = models.Tag.query().all()
+        self._tag_names = [t.name for t in self._tags]
 
     def refresh_attrs(self):
-        self.__attrs      = models.Attribute.query().group_by(models.Attribute.key).all()
-        self.__attr_keys  = [a.key for a in self.__attrs] 
-        self.__attr_keys += models.File.table.columns.keys()
+        self._attrs      = models.Attribute.query().group_by(models.Attribute.key).all()
+        self._attr_keys  = [a.key for a in self._attrs] 
+        self._attr_keys += models.File.table.columns.keys()
 
     def is_tag(self, name):
-        return [False, True][name in self.__tag_names]
+        return [False, True][name in self._tag_names]
 
     def is_attribute(self, name):
-        return [False, True][name in self.__attr_keys]
+        return [False, True][name in self._attr_keys]
 
     def is_namespace(self, name):
         return [False, True][name in self.__namespaces]
@@ -72,9 +94,7 @@ class MetaDataManager(singleton.Singleton):
     def is_only(self, name, cls_name):
         possible_classes = ['Attribute', 'Tag', 'Namespace']
         other_counter    = 0
-
         possible_classes.remove(cls_name)
-
         for n in possible_classes:
             to_eval = 'self.is_%s(name)' % n.lower()
             if eval(to_eval):
@@ -120,12 +140,6 @@ class MetaDataManager(singleton.Singleton):
             file_items = [f.name for f in files]
 
         return file_items + dir_items
-
-    def index_file(self, target, name):
-        pass
-
-    def index_dir(self, target, name):
-        pass
 
     def file_exists(self, path):
         path     = self.__prepare_path(path)
