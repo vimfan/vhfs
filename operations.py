@@ -115,7 +115,10 @@ class Attribute:
         # return list of directories: key = val
         @staticmethod
         def values(attr_key):
-            return [str('%s=%s') % (attr.key, attr.value) for attr in m.Attribute.context.filter(m.Attribute.key == attr_key).group_by(m.Attribute.value).all()]
+            return [str('%s=%s') % (attr.key, attr.value) 
+                for attr in m.Attribute.context.filter(
+                    m.Attribute.key == attr_key)
+                    .group_by(m.Attribute.value).all()]
 
 
         @staticmethod
