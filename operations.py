@@ -12,22 +12,22 @@ class Semantic:
     DIRENTRY_GENERATOR = 00100
     DIRENTRY_FILTER    = 01000
 
-class RegistryEntry:
-
-    def __init__(self, operation, semantic = SemanticEnum.UNKNOWN):
-        self.operation = operation
-        self.semantic = semantic
-
 class Registry:
 
     _entries = []
-    
+
+    class OperationEntry:
+
+        def __init__(self, operation, semantic = SemanticEnum.UNKNOWN):
+            self.operation = operation
+            self.semantic = semantic
+
     @classmethod
     def append_entry(cls, operation, semantic):
         '''
         Add new entry to the registry.
         '''
-        cls._entries.append(RegistryEntry(operation, semantic))
+        cls._entries.append(cls.OperationEntry(operation, semantic))
 
     @classmethod
     def semantic(cls, operation):
@@ -93,6 +93,12 @@ class Tag(Namespace):
             
         @semantic(Semantic.FILE_SQL_FILTER)
         def descendants(context, tag_name):
+            '''
+            Returns descendants of C{tag_name}
+
+            @param tag_name: Name of the tag.
+            @type tag_name: C{str}
+            '''
             pass
 
         @semantic(Semantic.DIRENTRY_GENERATOR)
@@ -108,21 +114,28 @@ class Tag(Namespace):
             pass
 
         class Class:
-            '''Pseudo class grouping all public class methods'''
-            
+            '''
+            Pseudo class grouping all public class methods
+            '''
+
             @semantic(Semantic.DIRENTRY_GENERATOR)
             def all(context, pattern):
-                '''Prepare all indexed tags'''
+                '''
+                Prepare all indexed tags
+                '''
                 pass
 
             @semantic(Semantic.FILE_SQL_FILTER)
             def any(name, pattern):
-                '''Filter only files which has some tags.'''
+                '''
+                Filter only files which has some tags.
+                '''
                 pass
 
             @semantic(Semantic.FILE_SQL_FILTER)
             def like(name, pattern):
-                '''Prepare all tags which names are like pattern.
+                '''
+                Prepare all tags which names are like pattern.
                 
                     examples: @Tag.like:'mus%' satisfies tags with names:
                     'music', 'musician', 'muse'
@@ -130,7 +143,9 @@ class Tag(Namespace):
                 pass
 
     class Private:
-        '''Pseudo class grouping all private methods for the Tag namespace'''
+        '''
+        Pseudo class grouping all private methods for the Tag namespace
+        '''
 
         @semantic(Semantic.FILE_SQL_FILTER)
         def has(context, tag_name):
@@ -269,7 +284,7 @@ class Attribute(Namespace):
         def assign(context, attr_key, attr_val):
             return cls.equal(context, attr_key, attr_val)
     
-class File:
+class File(Namespace):
 
     def transformed_name(self, path):
         ret = os.path.basename(path) 
@@ -306,7 +321,7 @@ class File:
             f = File.get_by(name = file_name)
             context.out = [t.name for t in f.tags]
 
-class Func:
+class Func(Namespace):
 
     class Public:
 

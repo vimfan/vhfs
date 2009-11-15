@@ -20,12 +20,12 @@ import traceback
 # models import
 from elixir import *
 from models import *
-from vhfs_parser import *
+from parser import *
 
 from vhfs_exceptions import VHFSException
 from exceptions import Exception
-from path_interpreter import PathInterpreter
-from path_interpreter import Path
+from interpreter import Interpreter
+from nodes import PathNode
 
 STORAGE_DIR='/tmp'
 
@@ -455,19 +455,19 @@ class VHFS(fuse.Fuse):
 
     def readdir(self, path, offset, dh):
         logging.info("readdir: %s (offset %s, dh %s)" % (path, offset, dh))
-        context           = self.context
-        context.path      = path
-        context.offset    = offset
+        context = self.context
+        context.path = path
+        context.offset = offset
         try:
-		    interpreter = PathInterpreter(c)
-            items       = interpreter.interpret()
-		    for item in items:
-			    yield fuse.Direntry(str(dir))
+		    interpreter = Interpreter(context)
+            interpreter.eval()
+
+		    for item in context.out:
+			    yield fuse.Direntry(str(item))
+
         except VHFSException, e:
             logging.info("Exception: %s\n%s \n%s" % (e, sys.exc_info(), 
                             traceback.extract_tb(sys.exc_traceback))) 
-            return e.err_code
-        return 0
 
     def open(self, path, flags):
         logging.info("open: %s (flags %s)" % (path, oct(flags)))

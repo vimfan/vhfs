@@ -93,7 +93,9 @@ class Interpreter(IInterpreter):
 class AbstractInterpreter(IInterpreter):
 
     def __init__(self, context):
-        self.__context = context
+        self._context = context
+
+    context = property(lambda self: self._context)
 
 class ReaddirInterpreter(AbstractInterpreter):
     '''
@@ -101,6 +103,7 @@ class ReaddirInterpreter(AbstractInterpreter):
             1. Context must have B{path} member correctly initialized, path must be
             grammaticaly correct. 
     '''
+
     def eval(self):
         '''
         Interprets path.
@@ -109,16 +112,22 @@ class ReaddirInterpreter(AbstractInterpreter):
         the list ivocation for getattr(full_path_to_item) must return
         appropriate instance of Fuse.Stat type.
         '''
-        path = PathNode(self.__context.path)
-        if len(filter()):
+        c = self.context 
+        c.path = PathNode(c.path)
+
+        if c.path[-1]
             pass
+
         # filter nodes
         # reduce nodes
         # sort nodes
         # add InterpreterHelperNode instance
         # for every node perform eval()
-        # return context.out
 
+        interpreter = NodeInterpreter(path, self.context)
+        interpreter.eval()
+
+        return context.out
 
 class AccessInterpreter(AbstractInterpreter):
     def eval(self):

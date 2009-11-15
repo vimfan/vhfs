@@ -94,9 +94,9 @@ class Node(object):
         '''
         return [self.name, self.func_node]
 
-    #def has_ancestors_of_type(self, type):
+    #def has_descendants_of_type(self, type):
         #'''
-            #Check whether node has ancestors of given type.
+            #Check whether node has descendants of given type.
 
             #@param type: Type we are looking for
             #@type type: Subclass of Node
@@ -104,8 +104,8 @@ class Node(object):
             #@rtype: bool
         #'''
         #return len(filter(lambda x: isinstance(x, type) 
-                    #or (hasattr(x, 'has_ancestors_of_type') 
-                    #and x.has_ancestors_of_type(type)), self.children())) > 0
+                    #or (hasattr(x, 'has_descendants_of_type') 
+                    #and x.has_descendants_of_type(type)), self.children())) > 0
 
     def descendants_of_type(self, type):
         '''
