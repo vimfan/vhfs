@@ -11,149 +11,44 @@ import operations
 from nodes import *
 from datatypes.generic import *
 
-class Context(object):
-    '''
-    Context class definition.
-
-    Operation member must always be set to the name of the operation by which
-    interpreter is invoked.
-
-    Allowed fields are now:
-        1. FS Api - specyfic
-            - operation, path, path2, times, flags, mode, rdev, offset
-        2. Interpreter specyfic
-            - steps_num, curr_step, next_step, registry
-
-    '''
-    def __init__(self):
-        self._properties = {}
-        self._permitted_keys = [
-            # fuse implementation dependable fields
-            'operation', 'path', 'path2', 'times', 
-            'flags',     'mode', 'rdev',  'offset',
-            # interpreter fields
-            'steps_num', 'curr_step', 'next_step'
-            # registry storage for use by interpreters
-            'registry', 'query'
-        ]
-        self._properties['steps_num'] = 1
-        self._properties['curr_step'] = 0
-        self._initialized = True
-
-    def __str__(self):
-        return '<# Context %s #>' % `self._properties`
-
-    def __getattr__(self, item):
-        try:
-            return self.__properties[item]
-        except KeyError:
-            raise AttributeError(item)
-
-    def __setattr__(self, item, value):
-        if not self.__dict__.has_key('_initialized'):
-            return object.__setattr__(self, item, value)
-        elif item in self._permitted_keys:
-            self._properties[item] = value
-        else:
-            raise AttributeError(item)
+import actions
 
 class IInterpreter(object):
     def eval():
         '''
-            Performs evaluation of an object.
+        Performs evaluation of an object.
 
-            This method must be overloaded by classes implementing this interface.
+        This method must be overloaded by classes implementing this interface.
         '''
         raise VHFSOverloadException()
 
 class Interpreter(IInterpreter):
-    '''Entry class for interpreting context.'''
-
-    def __init__(self, context):
-        self.__context = context
-
-    def eval(self):
-        '''
-            Performs parsing for at least one path (self.__context.path), and
-            if second path exists (set self.__context.path2) it invokes
-            appropriate interpreter at least one time.
-        '''
-        # PathNodeInterpreter implementation decides how many steps it needs,
-        # so self.__context.steps_num may be changed by ivoked interpreter
-        while self.__context.curr_step < self.__context.steps_num:
-            #class_name = self.__context.operation.capitalize() + 'Interpreter'
-            #interpreter = eval('%s(self.__context)' % class_name)
-            #interpreter.eval()
-            interpreter = Interpreter(self.__context)
-            self.__context.curr_step += 1
-
-        return self.__context.out
-
-    
-class AbstractInterpreter(IInterpreter):
+    '''
+    Entry class for interpreting context.
+    '''
 
     def __init__(self, context):
         self._context = context
 
-    context = property(lambda self: self._context)
-
-class ReaddirInterpreter(AbstractInterpreter):
-    '''
-        Interpreter for readdir FS api operation. One condition is obligatory:
-            1. Context must have B{path} member correctly initialized, path must be
-            grammaticaly correct. 
-    '''
-
     def eval(self):
         '''
-        Interprets path.
-
-        @return: List of direntries (files or directories). For every item in
-        the list ivocation for getattr(full_path_to_item) must return
-        appropriate instance of Fuse.Stat type.
+        Performs parsing for at least one path (self.__context.path), and if
+        second path exists (set self.__context.path2) it invokes appropriate
+        interpreter at least one time.
         '''
-        c = self.context 
-        c.path = PathNode(c.path)
 
-        ambigous_nodes = c.path.descendants_of_type(AmbigousNode)
-        if len(ambigous_nodes) > 0:
-            for node in ambigous_nodes:
-                NodeInterpreter(node, c).eval()
+        # PathNodeInterpreter implementation decides how many steps it needs,
+        # so self.__context.steps_num may be changed by ivoked interpreter
+        while self._context.curr_step < self._context.steps_num:
+            interpreter = Interpreter(self._context)
+            self._context.curr_step += 1
 
-        # filter nodes
-        # reduce nodes -> /@Func.limit:10/@Func.limit:200 => /@Func.limit:200
-        # sort nodes
-        # add InterpreterHelperNode instance
-        # for every node perform eval()
+        return self.__context.out
 
-        interpreter = NodeInterpreter(path, self.context)
+    def build_interpreter(self):
+        class_name = self.__context.operation.capitalize() + 'Interpreter'
+        interpreter = eval('%s(self.__context)' % class_name)
         interpreter.eval()
-
-        return context.out
-
-class AccessInterpreter(AbstractInterpreter):
-    def eval(self):
-        pass
-
-class GetattrInterpreter(AbstractInterpreter):
-    def eval(self):
-        pass
-
-class MkdirInterpreter(AbstractInterpreter):
-    def eval(self):
-        pass
-
-class RmdirInterpreter(AbstractInterpreter):
-    def eval(self):
-        pass
-
-class RenameInterpreter(AbstractInterpreter):
-    def eval(self):
-        pass
-
-class SymlinkInterpreter(AbstractInterpreter):
-    def eval(self):
-        pass
 
 class AbstractNodeInterpreter(IInterpreter):
 
@@ -170,6 +65,7 @@ class AbstractNodeInterpreter(IInterpreter):
         self._context = context
         self._node = node
         self._metadata_mgr = MetaDataManager.get_instance()
+        logging.debug(self.__class__.__name__)
 
 
     def __str__(self):
@@ -249,7 +145,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
             new_node_type = None
             possible_classes = ['Attribute', 'Tag', 'Namespace']
             for cls_name in possible_classes:
-                if self.__mdmgr.is_only(self.node.name.value, cls_name):
+                if self._metadata_mgr.is_only(self.node.name.value, cls_name):
                     new_node_type = eval(cls_name + 'Node')
 
                 if new_node_type is None:
@@ -262,11 +158,11 @@ class NodeInterpreter(AbstractNodeInterpreter):
                         for cls in possible_classes:
                             namespace = cls
                             if cls == 'Namespace':
-                                op_name   = m.NAMESPACE_METHOD_PREFIX + operation_name
+                                op_name = m.NAMESPACE_METHOD_PREFIX + operation_name
                                 namespace = node.name
                             else:
                                 op_name = operation_name
-                            if self._mdmgr.is_operation_of(op_name, namespace):
+                            if self._metadata_mgr.is_operation_of(op_name, namespace):
                                 new_node_type = eval(cls + 'Node')
                                 
                 if new_node_type == AttributeNode:
@@ -312,6 +208,11 @@ class NodeInterpreter(AbstractNodeInterpreter):
                 exec 'new_node = %s.cast("%s")' % (type_module + '.' + type_class, value)
             parent.replace_subnode(node, new_node)
 
-    class ValueNodeIntereter(AbstractNodeInterpreter):
+    class ValueNodeInterpreter(AbstractNodeInterpreter):
         def eval(self, node):
+            '''
+            No evaluation is needed for instances of ValueNode
+
+            @param node: Node to evaluate
+            '''
             pass
