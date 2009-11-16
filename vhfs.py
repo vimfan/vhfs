@@ -4,6 +4,10 @@
 # debugging messages (which are in some cases more, and some cases less useful
 # than mine).
 
+'''
+    @author Sebastian Madajczyk vimfan [at] gmail [dot] com
+'''
+
 import fuse
 
 import os
