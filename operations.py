@@ -26,6 +26,7 @@ class Semantic:
                 % {'field_name' : item.lower(), 'flag' : item})
 
 class Registry:
+
     _entries = []
 
     class Entry:
@@ -52,7 +53,7 @@ class Registry:
         @return: Semantic indicator
         @rtype: Semantic
         '''
-        for entry in cls.entries:
+        for entry in cls._entries:
             if entry.operation == operation:
                 return entry.semantic
 
@@ -81,11 +82,6 @@ def %s(f):
     return staticmethod(f)
 ''' % (decorator_name, semantic_indicator))
     return eval(decorator_name)
-
-# bo patient with using eval(), builtin function with that name
-# is very often used and we don't want to override it
-def run(context, cls, name, *args):
-    pass
 
 class Namespace:
     pass

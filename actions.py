@@ -1,8 +1,11 @@
+import errno
+
 import models as m
 import meta_data_manager
 import parser
 import operations
 
+from vhfs_exceptions import *
 from nodes import *
 from datatypes.generic import *
 
@@ -14,7 +17,7 @@ class Context(object):
     interpreter is invoked.
 
     Allowed fields are now:
-        1. FS Api - specyfic
+        1. FS Api - specific
             - operation, path, path2, times, flags, mode, rdev, offset
         2. Interpreter specyfic
             - steps_num, curr_step, next_step, registry
@@ -64,6 +67,11 @@ class AbstractFilesystemAction(IFilesystemAction):
     def __init__(self, context):
         self._context = context
 
+    context = property(lambda self: self._context)
+    '''
+    @ivar : Context member. Read-only.
+    '''
+
     def resolve_ambigouity(self, path):
         '''
         Resolves ambigouity when it's possible.
@@ -85,7 +93,7 @@ class AbstractFilesystemAction(IFilesystemAction):
 
     def perform_reductions(self, path):
         '''
-
+        Performs reductions of some reductable nodes.
         '''
         pass
 
@@ -97,7 +105,7 @@ class ReaddirAction(AbstractFilesystemAction):
             grammaticaly correct. 
     '''
 
-    def eval(self):
+    def perform(self):
         '''
         Interprets path.
 
@@ -107,8 +115,14 @@ class ReaddirAction(AbstractFilesystemAction):
         '''
         c = self.context 
         c.path = PathNode(c.path)
+
+        if filter(lambda x: isinstance(x, UnknownNode):
+            raise VHFSException(msg = 'Unkonown Node : %s' % str(UnkonownNode), 
+                err_code = errno.ENOENT)
+
         self.resolve_ambigouity(c.path)
         self.perform_type_casting(c.path)
+        self.resolve_functions(c.path)
 
         # filter nodes
 
@@ -122,26 +136,26 @@ class ReaddirAction(AbstractFilesystemAction):
         return context.out
 
 class AccessAction(AbstractFilesystemAction):
-    def eval(self):
+    def perform(self):
         pass
 
 class GetattrAction(AbstractFilesystemAction):
-    def eval(self):
+    def perform(self):
         pass
 
 class MkdirAction(AbstractFilesystemAction):
-    def eval(self):
+    def perform(self):
         pass
 
 class RmdirAction(AbstractFilesystemAction):
-    def eval(self):
+    def perform(self):
         pass
 
 class RenameAction(AbstractFilesystemAction):
-    def eval(self):
+    def perform(self):
         pass
 
 class SymlinkAction(AbstractFilesystemAction):
-    def eval(self):
+    def perform(self):
         pass
 

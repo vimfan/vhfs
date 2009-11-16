@@ -30,6 +30,7 @@ from vhfs_exceptions import VHFSException
 from exceptions import Exception
 from interpreter import Interpreter
 from nodes import PathNode
+from actions import *
 
 STORAGE_DIR='/tmp'
 
@@ -463,9 +464,8 @@ class VHFS(fuse.Fuse):
         context.path = path
         context.offset = offset
         try:
-		    interpreter = Interpreter(context)
-            interpreter.eval()
-
+            readdir_action = ReaddirAction(context)
+            readdir_action.perform()
 		    for item in context.out:
 			    yield fuse.Direntry(str(item))
 
