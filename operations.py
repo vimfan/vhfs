@@ -20,7 +20,7 @@ class Registry:
 
         def __init__(self, operation, semantic = SemanticEnum.UNKNOWN):
             self.operation = operation
-            self.semantic = semantic
+            self.semantic = Semantic(semantic)
 
     @classmethod
     def append_entry(cls, operation, semantic):
