@@ -210,7 +210,10 @@ def %s(f):
 
 class Test(object):
 
+    SQL_FILTER = 01
+
     def __init__(self):
+        print Test.SQL_FILTER
         Test.Test2()
 
     class Public:
@@ -230,6 +233,7 @@ class Test(object):
         def __init__(self):
             Test.Public.bla()
 
-#Test()
+Test()
 Test.Public.bla()
 print registry
+

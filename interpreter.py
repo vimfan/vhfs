@@ -115,11 +115,13 @@ class ReaddirInterpreter(AbstractInterpreter):
         c = self.context 
         c.path = PathNode(c.path)
 
-        if c.path[-1]
-            pass
+        ambigous_nodes = c.path.descendants_of_type(AmbigousNode)
+        if len(ambigous_nodes) > 0:
+            for node in ambigous_nodes:
+                NodeInterpreter(node, c).eval()
 
         # filter nodes
-        # reduce nodes
+        # reduce nodes -> /@Func.limit:10/@Func.limit:200 => /@Func.limit:200
         # sort nodes
         # add InterpreterHelperNode instance
         # for every node perform eval()
