@@ -76,13 +76,8 @@ def %s(f):
             break
         trace.insert(0, stair)
         i += 1
-<<<<<<< HEAD:operations.py
-    func_name = ".".join(trace)
-    Registry.append_operation(func_name, %s)
-=======
     operation_name = ".".join(trace)
     Registry.append_entry(operation_name, %s)
->>>>>>> f95c3d44cdc67d595af3ad0d4278f02fd0bd5378:operations.py
     return staticmethod(f)
 ''' % (decorator_name, semantic_indicator))
     return eval(decorator_name)
