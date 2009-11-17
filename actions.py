@@ -56,7 +56,7 @@ class Context(object):
             raise AttributeError(item)
 
 class IAction(object):
-    def perform()
+    def perform():
         pass
 
 class IFilesystemAction(IAction):
@@ -91,6 +91,45 @@ class AbstractFilesystemAction(IFilesystemAction):
         for node in type_cast_nodes:
             NodeInterpreter(node, self._context).eval()
 
+    def resolve_operation_defaults(self, path):
+        '''
+        Resolve all FuncNode's with name member set to: '' (empty string)
+        or TagNodes with empty FuncNode child.
+
+        Nodes like:  
+            - C{<AttributeNode <FuncNode ()>>} 
+              sets to: C{<AttributeNode <FuncNode default()>>}
+            - C{<TagNode <FuncNode ()>>} 
+              sets to: C{<TagNode <FuncNode children()>>}
+            - C{<TagNode>} 
+              sets to: C{<TagNode <FuncNode has()>>}
+        '''
+        defaults = {
+            AttributeNode : 'values',
+            TagNode       : 'children',
+            NamespaceNode : 'dir',
+        }
+        empties = {
+            TagNode       : 'has',
+            NamespaceNode : 'dir'
+        }
+        
+
+    def resolve_operation_names(self, path, func = self.resolve_operation_defaults):
+        func_nodes = path.descendants_of_type(FuncNode)
+        for node in func_nodes:
+            # 'NamespaceNode'[0:-4] == 'Namespace'
+            name_parts = []
+            name = node.name.value
+            class_name = node.parent.__class__.__name__[0:-4]
+            if class_name in ['AttributeNode', 'TagNode']:
+                node.
+            elif class_name == 'NamespaceNode':
+            else:
+                continue
+            node.name.value = '.'.join(name_parts)
+                
+
     def perform_reductions(self, path):
         '''
         Performs reductions of some reductable nodes.
@@ -116,13 +155,13 @@ class ReaddirAction(AbstractFilesystemAction):
         c = self.context 
         c.path = PathNode(c.path)
 
-        if filter(lambda x: isinstance(x, UnknownNode):
+        if filter(lambda x: isinstance(x, UnknownNode), path.children()):
             raise VHFSException(msg = 'Unkonown Node : %s' % str(UnkonownNode), 
                 err_code = errno.ENOENT)
 
         self.resolve_ambigouity(c.path)
         self.perform_type_casting(c.path)
-        self.resolve_functions(c.path)
+        self.resolve_operation_names(c.path)
 
         # filter nodes
 

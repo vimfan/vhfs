@@ -165,15 +165,15 @@ class NodeInterpreter(AbstractNodeInterpreter):
                             if self._metadata_mgr.is_operation_of(op_name, namespace):
                                 new_node_type = eval(cls + 'Node')
                                 
-                if new_node_type == AttributeNode:
+                if new_node_type is AttributeNode:
                     new_node = AttributeNode(name = node.name, 
                                              func_node = node.func_node, 
                                              parent = parent)
-                elif new_node_type == TagNode:
+                elif new_node_type is TagNode:
                     new_node  = TagNode(name = node.name, 
                                         func_node = func_node, 
                                         parent = parent)
-                elif new_node_type == NamespaceNode:
+                elif new_node_type is NamespaceNode:
                     new_node  = NamespaceNode(name = node.name, 
                                               func_node = node.func_node, 
                                               parent = parent)

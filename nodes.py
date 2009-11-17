@@ -285,8 +285,13 @@ class FuncNode(Node):
     def __init__(self, name, args = [], **kw):
         super(FuncNode, self).__init__(name, **kw)
         self._args = NodeList(args, parent = self)
+        # flag inform operation in public
+        self._public = True
+        self.
+        self._class = True
 
     args = property(lambda self: self._args)
+    public = poperty(lambda self: self._public, lambda self: )
 
     def __setattr__(self, item, value):
         if item in ['_args', 'args']:

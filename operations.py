@@ -83,8 +83,13 @@ def %s(f):
 ''' % (decorator_name, semantic_indicator))
     return eval(decorator_name)
 
-class Namespace:
-    pass
+class Namespace(object):
+    def dir():
+        '''
+        Operation which lets user see all operations supported by
+        the namespace.
+        '''
+        pass
 
 class Tag(Namespace):
 

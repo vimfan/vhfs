@@ -2,17 +2,17 @@
 
 ##SQL_FILTER, RETURN_DIRS = range(2)
 ##def op_type(operation_type):
-	##def test(f):
-		##register[f.func_name] = operation_type
-		##return f
-	##return test
-	
+    ##def test(f):
+        ##register[f.func_name] = operation_type
+        ##return f
+    ##return test
+    
 
 ##class Test:
 
-	##@op_type(SQL_FILTER)
-	##def test1(self):
-		##print 'test1 : ble'
+    ##@op_type(SQL_FILTER)
+    ##def test1(self):
+        ##print 'test1 : ble'
 
 
 
@@ -27,37 +27,37 @@
 ##print pc
 
 ##class Test:
-	##def __init__(self):
-		##if self.ble == None:
-			##print 'spoko'
+    ##def __init__(self):
+        ##if self.ble == None:
+            ##print 'spoko'
 
 
 ##Test()
 
 
 ##def test():
-	##import sys
-	##print sys._getframe(2).f_code.co_name
-	##print sys._getframe(1).f_code.co_name
+    ##import sys
+    ##print sys._getframe(2).f_code.co_name
+    ##print sys._getframe(1).f_code.co_name
 
 ##def test2():
-	##test()
+    ##test()
 
 ##test2()
 
 #class Test(object):
 
-	#def __init__(self):
-		#self.__x = 0
+    #def __init__(self):
+        #self.__x = 0
 
-	#def __get_x(self):
-		#return self.__x
+    #def __get_x(self):
+        #return self.__x
 
-	#def __set_x(self, value):
-		#self.__x = value
+    #def __set_x(self, value):
+        #self.__x = value
 
-	#x = property(__get_x)
-		
+    #x = property(__get_x)
+        
 #class TestExt(Test):
 
     #def __init__(self):
@@ -70,13 +70,13 @@
 
     #def print_mro(self):
         #print cls.__mro__
-	
+    
 #class TestThird(TestExt, Test):
 
-	#def __init__(self):
-		#super(Test, self).__init__()
+    #def __init__(self):
+        #super(Test, self).__init__()
 
-	
+    
 
 ##a = TestExt()
 ##a.print_mro()
@@ -178,62 +178,94 @@
 #l.append(0)
 #l[0] = 1
 
-registry = {}
+#registry = {}
 
-class SemanticEnum:
-    UNKNOWN            = 0
-    FILE_RESULT_FILTER = 1
-    SQL_FILTER         = 2
-    DIRENTRY_GENERATOR = 3
-    DIRENTRY_FILTER    = 4
+#class SemanticEnum:
+    #UNKNOWN            = 0
+    #FILE_RESULT_FILTER = 1
+    #SQL_FILTER         = 2
+    #DIRENTRY_GENERATOR = 3
+    #DIRENTRY_FILTER    = 4
 
-def deco(semantic_indicator = SemanticEnum.UNKNOWN):
-    decorator_name = 'semantic_' + str(semantic_indicator)
-    exec('''
-def %s(f):
-    import sys
-    import re
-    i = 1
-    trace = []
-    trace.insert(0, f.func_name)
-    while True:
-        stair = sys._getframe(i).f_code.co_name
-        if re.search("module", stair):
-            break
-        trace.insert(0, stair)
-        i += 1
-    func_name = ".".join(trace)
-    registry[func_name] = %s
-    return staticmethod(f)
-''' % (decorator_name, semantic_indicator))
-    return eval(decorator_name)
+#def deco(semantic_indicator = SemanticEnum.UNKNOWN):
+    #decorator_name = 'semantic_' + str(semantic_indicator)
+    #exec('''
+#def %s(f):
+    #import sys
+    #import re
+    #i = 1
+    #trace = []
+    #trace.insert(0, f.func_name)
+    #while True:
+        #stair = sys._getframe(i).f_code.co_name
+        #if re.search("module", stair):
+            #break
+        #trace.insert(0, stair)
+        #i += 1
+    #func_name = ".".join(trace)
+    #registry[func_name] = %s
+    #return staticmethod(f)
+#''' % (decorator_name, semantic_indicator))
+    #return eval(decorator_name)
 
-class Test(object):
+#class Test(object):
 
-    SQL_FILTER = 01
+    #SQL_FILTER = 01
 
-    def __init__(self):
-        print Test.SQL_FILTER
-        Test.Test2()
+    #def __init__(self):
+        #print Test.SQL_FILTER
+        #Test.Test2()
 
-    class Public:
+    #class Public:
 
-        @deco(SemanticEnum.FILE_RESULT_FILTER)
-        def bla():
-            print 'ble'
+        #@deco(SemanticEnum.FILE_RESULT_FILTER)
+        #def bla():
+            #print 'ble'
 
-        class Class:
+        #class Class:
 
-            @deco(SemanticEnum.FILE_RESULT_FILTER)
-            def example():
-                pass
+            #@deco(SemanticEnum.FILE_RESULT_FILTER)
+            #def example():
+                #pass
             
 
-    class Test2:
-        def __init__(self):
-            Test.Public.bla()
+    #class Test2:
+        #def __init__(self):
+            #Test.Public.bla()
 
-Test()
-Test.Public.bla()
-print registry
+#Test()
+#Test.Public.bla()
+#print registry
+
+def switcher(a, b):
+    skeleton = '''
+def set_%(first)s(self, val):
+    self._%(first)s = val
+    self._%(second)s = not val
+
+def get_%(first)s(self):
+    return self._%(first)s
+
+def is_%(first)s(self):
+    return self._%(first)s\n'''
+
+    out = skeleton % {'first' : a, 'second' : b}
+    out += skeleton % {'first' : b, 'second' : a}
+    skeleton = '%(first)s = property(get_%(first)s, set_%(first)s)\n'
+    out += skeleton % {'first' : a}
+    out += skeleton % {'first' : b}
+    return out
+
+
+
+class Test:
+    def __init__(self):
+        #self.public = True
+        #self.classmethod = False
+        pass
+
+    exec(switcher('public', 'private'))
+
+t = Test()
+t.public
 
