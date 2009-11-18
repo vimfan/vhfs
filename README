@@ -1,0 +1,64 @@
+Virtual Hybrid File System
+
+Research project which main aim is to create an implementation of some
+conception for virtual and partially hierarchical - partially semantic
+filesystem. 
+
+Quick introduction in question - answer items.
+
+*Question*: 
+Why it's hybrid?
+
+*Answer*: 
+Because it synthesizes some concepts of semantic and hierarchical
+filesystems. It uses tags, but we assume that tags may be organized in
+hierarchies so they build tree.
+
+
+*Question*: 
+Why it's virtual?
+
+*Answer*: 
+Beacause it doesn't take care of storing files. Files are stored in
+"traditional" filesystems, and VHFS keeps only symbolic links to them.
+
+
+*Question*:
+Why it's a filesystem?
+
+*Answer*:
+Filesystem interface is used by all legacy applications. Good thing would be to
+get some new possibilities for organizing data and give them legacy
+applications. 
+
+Examples:
+
+From now on we're assuming that /vhfs is an mountpoint of our virtual
+filesystem. Note that we don't store any files, just links to them. 
+
+* USE CASES
+
+    Searching files using ls utility
+
+    * with tags concept:
+
+    $ ls -al /vhfs/@music/@jazz/not@rock
+    lrwxrwxrwx 1 user user 11 2009-11-18 00:58 urbaniak.i34.mp3 -> /home/user/music/urbaniak.mp3
+    lrwxrwxrwx 1 user user 11 2009-11-18 00:58 jerzy_milan.i45.mp3 -> /home/user/music/jerzy_milan.mp3
+
+    $ ls -al /vhfs/not@rock/@jazz/@music
+    lrwxrwxrwx 1 user user 11 2009-11-18 00:58 urbaniak.i34.mp3 -> /home/user/music/urbaniak.mp3
+    lrwxrwxrwx 1 user user 11 2009-11-18 00:58 jerzy_milan.i45.mp3 -> /home/user/music/jerzy_milan.mp3
+
+    (Please note: output is identical in both cases(!) despite we've change 
+    order of path parts)
+
+    * using Attributes:
+
+    $ ls -al /vhfs/@bitrate < 192/@year < 2000/@modification < 2009-01-03
+    lrwxrwxrwx 1 user user 11 2009-11-18 00:58 miles_davis.i1.mp3 -> /tmp/Miles Davis.mp3
+
+    $ ls -al /vhfs/@bitrate < 192/@year < 2000/@modification < 2009-01-03
+    lrwxrwxrwx 1 user user 11 2009-11-18 00:58 miles_davis.i1.mp3 -> /tmp/Miles Davis.mp3
+
+TODO ...
