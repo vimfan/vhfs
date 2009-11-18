@@ -58,7 +58,9 @@ filesystem. Note that we don't store any files, just links to them.
     $ ls -al /vhfs/@bitrate < 192/@year < 2000/@modification < 2009-01-03
     lrwxrwxrwx 1 user user 11 2009-11-18 00:58 miles_davis.i1.mp3 -> /tmp/Miles Davis.mp3
 
-    $ ls -al /vhfs/@bitrate < 192/@year < 2000/@modification < 2009-01-03
+    $ ls -al /vhfs/@modification < 2009-01-03/@year < 2000/@bitrate < 192
     lrwxrwxrwx 1 user user 11 2009-11-18 00:58 miles_davis.i1.mp3 -> /tmp/Miles Davis.mp3
+
+    (Order of path parts again doesn't matter - outpus it the same)
 
 TODO ...
