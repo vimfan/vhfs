@@ -285,9 +285,8 @@ class FuncNode(Node):
     def __init__(self, name, args = [], **kw):
         super(FuncNode, self).__init__(name, **kw)
         self._args = NodeList(args, parent = self)
-        # flag inform operation in public
+        # flag shows whether operation is public or private
         self._public = True
-        self.
         self._class = True
 
     args = property(lambda self: self._args)

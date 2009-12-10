@@ -311,7 +311,7 @@ class Attribute(Namespace):
         def regexp(context, attr_key, pattern):
             '''
             Operation semantically similar to regexp, but instead of regexp()
-            we're using glob() SQLite builtin method.
+            we're using glob() SQLite builtin function.
             '''
             if Attribute.is_inherent_attr(attr_key):
                 context.query.filter(eval('m.File.%s' % attr_key).glob(pattern))

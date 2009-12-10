@@ -32,22 +32,21 @@ class Interpreter(IInterpreter):
 
     def eval(self):
         '''
-        Performs parsing for at least one path (self.__context.path), and if
-        second path exists (set self.__context.path2) it invokes appropriate
+        Performs parsing for at least one path (self._context.path), and if
+        second path exists (set self._context.path2) it invokes appropriate
         interpreter at least one time.
         '''
-
         # PathNodeInterpreter implementation decides how many steps it needs,
-        # so self.__context.steps_num may be changed by ivoked interpreter
+        # so self._context.steps_num may be changed by ivoked interpreter
         while self._context.curr_step < self._context.steps_num:
             interpreter = Interpreter(self._context)
             self._context.curr_step += 1
 
-        return self.__context.out
+        return self._context.out
 
     def build_interpreter(self):
-        class_name = self.__context.operation.capitalize() + 'Interpreter'
-        interpreter = eval('%s(self.__context)' % class_name)
+        class_name = self._context.operation.capitalize() + 'Interpreter'
+        interpreter = eval('%s(self._context)' % class_name)
         interpreter.eval()
 
 class AbstractNodeInterpreter(IInterpreter):
@@ -131,6 +130,9 @@ class NodeInterpreter(AbstractNodeInterpreter):
         def eval(self):
             logging.debug('TagNodeInterpreter')
             self.eval_children()
+
+    class FuncNodeInterpreter(AbstractNodeInterpreter):
+        pass
 
     class AmbigousNodeInterpreter(AbstractNodeInterpreter):
         def eval(self):

@@ -254,18 +254,21 @@ def is_%(first)s(self):
     skeleton = '%(first)s = property(get_%(first)s, set_%(first)s)\n'
     out += skeleton % {'first' : a}
     out += skeleton % {'first' : b}
-    return out
+    exec out
+    print out
 
 
 
 class Test:
     def __init__(self):
-        #self.public = True
-        #self.classmethod = False
+        self._public = True
+        self._private = False
+        self.classmethod = False
         pass
 
-    exec(switcher('public', 'private'))
+    switcher('public', 'private')
 
 t = Test()
-t.public
-
+#print t.public
+#print t.private
+print dir(t)
