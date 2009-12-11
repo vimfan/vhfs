@@ -282,15 +282,35 @@ class PathNode(Node):
             self._nodes.insert(index, node)
 
 class FuncNode(Node):
+
     def __init__(self, name, args = [], **kw):
         super(FuncNode, self).__init__(name, **kw)
         self._args = NodeList(args, parent = self)
-        # flag shows whether operation is public or private
-        self._public = True
-        self._class = True
 
+        # flag indicates whether operation is public or private
+        self.is_public = True
+
+        # flag indicates whether operation is associated with particular instance
+        # of some class (tag, attribute etc.)
+        self.is_class_method = True
+
+    def _set_public(self, value):
+        self._public  = [False, True][bool(value)]
+
+    def _set_private(self, value):
+        self._set_public(not bool(value))
+
+    def _set_class_method(self, value):
+        self._class = (value) ? True : False
+
+    def _set_instance_method(self, value):
+        self._set_class_method(not bool(value))
+        
     args = property(lambda self: self._args)
-    public = poperty(lambda self: self._public, lambda self: )
+    is_public = poperty(lambda self: self._public, _set_public, None, "Flag indicates whether operation is public (true) or private (false)")
+    is_private = poperty(lambda self: not self._public, _set_private)
+    is_class_method = poperty(lambda self: self._class)
+    is_instance_method = poperty(lambda self: not self._class, _set_instance)
 
     def __setattr__(self, item, value):
         if item in ['_args', 'args']:
