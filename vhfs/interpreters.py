@@ -90,18 +90,23 @@ class NodeInterpreter(AbstractNodeInterpreter):
 
     def __init__(self, *arg, **kw):
         super(NodeInterpreter, self).__init__(*arg, **kw)
+        self.interneter_impl = None
 
     def eval(self):
-        interpreter_impl_class_name = self.node.__class__.__name__ + 'Interpreter'
-        interpreter_impl = eval('NodeInterpreter.%s(self.node, self.context)' %
-                            interpreter_impl_class_name)
-        interpreter_impl.eval()
+        interpreter_impl_class_name = self.build_interpreter_class_name()
+        self.interpreter_impl = eval('NodeInterpreter.%s(self.node, self.context)' %
+                                      interpreter_impl_class_name)
+        self.interpreter_impl.eval()
+
+    def build_interpreter_class_name(self):
+        return self.node.__class__.__name__ + 'Interpreter'
+        
 
     class PathNodeInterpreter(AbstractNodeInterpreter):
         
         def __init__(self, *arg, **kw):
             super(PathNodeInterpreter, self).__init__(*arg, **kw)
-            #self._mdmgr = meta_data_manager.MetaDataManager.getInstance()
+            self._mdmgr = meta_data_manager.MetaDataManager.getInstance()
 
         def eval(self):
             self.eval_children()
@@ -147,6 +152,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
             new_node_type = None
             possible_classes = ['Attribute', 'Tag', 'Namespace']
             for cls_name in possible_classes:
+
                 if self._metadata_mgr.is_only(self.node.name.value, cls_name):
                     new_node_type = eval(cls_name + 'Node')
 
@@ -164,6 +170,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
                                 namespace = node.name
                             else:
                                 op_name = operation_name
+
                             if self._metadata_mgr.is_operation_of(op_name, namespace):
                                 new_node_type = eval(cls + 'Node')
                                 
@@ -181,6 +188,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
                                               parent = parent)
                 else:
                     new_node = None
+
                 if new_node != None:
                     parent.replace_subnode(node, new_node)
                 else:

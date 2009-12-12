@@ -82,3 +82,6 @@ path = nodes.PathNode(s)
 #Test.greater_than(1)
 
 
+import operations
+for entry in operations.Registry._entries:
+    print entry

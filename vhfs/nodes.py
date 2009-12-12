@@ -1,7 +1,6 @@
 import vhfs_exceptions as exc
 import parser
 
-
 class NodeList(list):
 
     def __init__(self, l = [], parent = None):
@@ -288,29 +287,29 @@ class FuncNode(Node):
         self._args = NodeList(args, parent = self)
 
         # flag indicates whether operation is public or private
-        self.is_public = True
+        self.public = True
 
         # flag indicates whether operation is associated with particular instance
         # of some class (tag, attribute etc.)
-        self.is_class_method = True
+        self.instance_method = True
 
     def _set_public(self, value):
-        self._public  = [False, True][bool(value)]
+        object.__setattr__(self, '_public', bool(value))
 
     def _set_private(self, value):
-        self._set_public(not bool(value))
+        object.__setattr__(self, '_public', not bool(value))
 
     def _set_class_method(self, value):
-        self._class = (value) ? True : False
+        object.__setattr__(self, '_class', bool(value))
 
     def _set_instance_method(self, value):
-        self._set_class_method(not bool(value))
+        object.__setattr__(self, '_class', not bool(value))
         
     args = property(lambda self: self._args)
-    is_public = poperty(lambda self: self._public, _set_public, None, "Flag indicates whether operation is public (true) or private (false)")
-    is_private = poperty(lambda self: not self._public, _set_private)
-    is_class_method = poperty(lambda self: self._class)
-    is_instance_method = poperty(lambda self: not self._class, _set_instance)
+    public = property(lambda self: self._public, _set_public)
+    private = property(lambda self: not self._public, _set_private)
+    class_method = property(lambda self: self._class, _set_class_method)
+    instance_method = property(lambda self: not self._class, _set_instance_method)
 
     def __setattr__(self, item, value):
         if item in ['_args', 'args']:
@@ -320,7 +319,11 @@ class FuncNode(Node):
         super(FuncNode, self).__setattr__(item, value)
 
     def _repr_injection(self):
-        return ' ' + str(self.name) + '(' + [','.join([str(arg) for arg in self.args]), ''][len(self.args) == 0] + ')'
+        return (' ' + (['private', 'public'][int(self.is_public)]) 
+                    + (['.', '::'][int(self.is_class_method)]) + str(self.name) 
+                    + '(' 
+                    + [','.join([str(arg) for arg in self.args]), ''][len(self.args) == 0] 
+                    + ')')
 
     def children(self):
         l = super(FuncNode, self).children()
@@ -365,7 +368,7 @@ class TypeCastNode(Node):
         return ' {%s:%s}' %  (
             str(self.type) + ['', str(self.func_node)][self.func_node <> None], 
             str(self.value)
-            )
+        )
 
 class UnknownNode(Node):
     pass

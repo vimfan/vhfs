@@ -2,8 +2,6 @@ import models as m
 import sys
 import re
 
-from namespaces import *
-
 class Semantic:
 
     FILE_SQL_FILTER = 0x0001 
@@ -20,12 +18,22 @@ class Semantic:
        /@Func.limit:10/@Func.limit:20 => /@Func.limit:20'''
 
     def __init__(self, flags):
-        possible_flags = ['FILE_SQL_FILTER', 'SQL_FILTER', 
-                                 'DIRENTRY_GENERATOR', 'DIRENTRY_FILTER', 
-                                 'REDUCIBLE_FILTER']
-        for item in possible_flags: 
-            eval('self.%(field_name)s = (Semantic.%(flag)s & flags) != 0 ' \
+        self._possible_flags = ['FILE_SQL_FILTER', 
+                          'SQL_FILTER', 
+                          'DIRENTRY_GENERATOR', 
+                          'DIRENTRY_FILTER', 
+                          'REDUCIBLE_FILTER']
+
+        for item in self._possible_flags: 
+            exec('self.%(field_name)s = ((Semantic.%(flag)s & flags) != 0) ' \
                 % {'field_name' : item.lower(), 'flag' : item})
+
+    def __repr__(self):
+        flags = []
+        for flag in self._possible_flags:
+            if eval('self.%(field_name)s' % {'field_name' : flag.lower() }):
+                flags.append(flag)
+        return ' | '.join(flags)
 
 class Registry:
 
@@ -39,6 +47,9 @@ class Registry:
         def __init__(self, operation, semantic_flags):
             self.operation = operation
             self.semantic = Semantic(semantic_flags)
+
+        def __repr__(self):
+            return "%s semantic: %s" % (self.operation, self.semantic)
 
     @classmethod
     def append_operation(cls, operation, semantic):
@@ -58,6 +69,7 @@ class Registry:
         for entry in cls._entries:
             if entry.operation == operation:
                 return entry.semantic
+    
 
 def semantic(semantic_indicator):
     '''
@@ -75,12 +87,12 @@ def %s(f):
     trace.insert(0, f.func_name)
     while True:
         level = sys._getframe(i).f_code.co_name
-        if re.search("module", stair):
+        if re.search("module", level):
             break
         trace.insert(0, level)
         i += 1
     operation_name = ".".join(trace)
-    Registry.append_entry(operation_name, %s)
+    Registry.append_operation(operation_name, %s)
     return staticmethod(f)
 ''' % (decorator_name, semantic_indicator))
     return eval(decorator_name)
@@ -93,3 +105,5 @@ class Namespace(object):
         '''
         pass
           
+
+from namespaces import *

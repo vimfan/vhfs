@@ -1,3 +1,9 @@
+from .operations import Namespace
+from .operations import semantic
+from .operations import Semantic
+
+import models as m
+
 class Tag(Namespace):
 
     class Public:

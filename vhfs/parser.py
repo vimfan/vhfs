@@ -261,9 +261,6 @@ def p_file_node(t):
         t[0] = FileNode(name = t[1], func_node = t[2])
         t[2].parent = t[0]
 
-# /music/album:like %usic (:like %usic)
-# /music/album:regexp m?sic (:regexp m?sic)
-# /music/:limit 10
 def p_func_node(t):
     '''func_node : FUNC ARG_SPECIFIER args
                  | FUNC
@@ -273,7 +270,6 @@ def p_func_node(t):
     else:
         t[1] = t[1][1:]
     if len(t) == 4:
-        # FIXME: args must have only Node instances
         t[0] = FuncNode(name = t[1], args = t[3])
     else:
         t[0] = FuncNode(name = t[1], args = [])
@@ -287,9 +283,6 @@ def p_date_time(t):
     t[0] = datetime.datetime(t[1].year, t[1].month, t[1].day, \
                              t[3].hour, t[3].minute, t[3].second)
 
-# examples of usage arg list: 
-# :limit 10
-# :order name, album, bitrate
 def p_args(t):
     '''args : args ARG_SEPARATOR func_arg 
             | func_arg'''
