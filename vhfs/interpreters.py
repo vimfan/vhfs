@@ -65,8 +65,6 @@ class AbstractNodeInterpreter(IInterpreter):
         self._context = context
         self._node = node
         self._metadata_mgr = MetaDataManager.get_instance()
-        logging.debug(self.__class__.__name__)
-
 
     def __str__(self):
         return '<# %s (%s) #>' % (self.__class__.__name__, str(self.node))
@@ -173,47 +171,36 @@ class NodeInterpreter(AbstractNodeInterpreter):
             operation_name = node.func_node.name.value 
 
             if self._metadata_mgr.is_namespace(node.name.value):
-
                 namespace_name = node_name
-
                 if operations.Registry.is_namespace_operation(namespace_name, 
                                                               operation_name, 
                                                               is_instance = False):
                     new_node_type = NamespaceNode
             else:
-
                 if self._metadata_mgr.is_attribute(node_name):
                     new_node_type = AttributeNode
-
                 if self._metadata_mgr.is_tag(node_name):
-
                     if new_node_type == None:
                         new_node_type = TagNode
-
                     else:
                         # if node_name may be the name of a tag or name of an attribute
                         # then it decides which to choose by the operation_name
                         new_node_type = None
-
                         if operations.is_namespace_operation('Attribute', operation_name):
                             new_node_type = AttributeNode
-
                         if operations.is_namespace_operation('Tag', operation_name):
                             if new_node_type == None:
                                 new_node_type = TagNode
                             else:
                                 new_node_type = None
-                
             if new_node_type is AttributeNode:
                 new_node = AttributeNode(name = node.name, 
                                          func_node = node.func_node, 
                                          parent = node.parent)
-
             elif new_node_type is TagNode:
                 new_node  = TagNode(name = node.name, 
                                     func_node = func_node, 
                                     parent = node.parent)
-
             elif new_node_type is NamespaceNode:
                 new_node  = NamespaceNode(name = node.name, 
                                           func_node = node.func_node, 
@@ -223,7 +210,6 @@ class NodeInterpreter(AbstractNodeInterpreter):
 
             if new_node != None:
                 parent.replace_children_node(node, new_node)
-
             else:
                 raise VHFSException(msg='Cannot resolve ambigous Node %s' 
                                          % node, err_code = errno.EBADMSG)

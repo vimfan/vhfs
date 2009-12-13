@@ -91,10 +91,25 @@ class AbstractFilesystemAction(IFilesystemAction):
         for node in type_cast_nodes:
             NodeInterpreter(node, self._context).eval()
 
-    def resolve_operation_defaults(self, path):
+    class Operation:
+        def __init__(self, name, is_public, is_instance):
+            pass
+
+        
+
+    def resolve_operation_defaults(self, path, defaults = None, empties = None):
         '''
         Resolve all FuncNode's with name member set to: '' (empty string)
         or TagNodes with empty FuncNode child.
+
+        @param path
+        @type PathNode
+
+        @param defaults
+        @type defaults list 
+
+        @param empties 
+        @type empties list
 
         Nodes like:  
             - C{<AttributeNode <FuncNode ()>>} 
@@ -104,16 +119,20 @@ class AbstractFilesystemAction(IFilesystemAction):
             - C{<TagNode>} 
               sets to: C{<TagNode <FuncNode has()>>}
         '''
-        defaults = {
-            AttributeNode : 'values',
-            TagNode       : 'children',
-            NamespaceNode : 'dir',
-        }
-        empties = {
-            TagNode       : 'has',
-            NamespaceNode : 'dir'
-        }
-        
+
+        if defaults == None:
+            defaults = {
+                AttributeNode : 'Public.values',
+                TagNode       : 'Public.children',
+                NamespaceNode : 'Public.dir'
+            }
+
+        if empties == None:
+            empties = {
+                TagNode       : 'Private.has',
+                NamespaceNode : 'Private.ignore'
+            }
+
 
     def resolve_operation_names(self, path, func):
 
@@ -145,6 +164,10 @@ class ReaddirAction(AbstractFilesystemAction):
             1. Context must have B{path} member correctly initialized. Path must be
             grammaticaly valid to perform read of directory. 
     '''
+
+    def resolve_operation_defaults(self, path):
+        super(ReaddirAction, self).resolve_operation_defaults(path)
+        
 
     def perform(self):
         '''
