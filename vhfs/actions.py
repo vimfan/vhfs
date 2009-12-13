@@ -115,16 +115,18 @@ class AbstractFilesystemAction(IFilesystemAction):
         }
         
 
-    def resolve_operation_names(self, path, func = self.resolve_operation_defaults):
+    def resolve_operation_names(self, path, func):
+
         func_nodes = path.descendants_of_type(FuncNode)
+
         for node in func_nodes:
-            # 'NamespaceNode'[0:-4] == 'Namespace'
             name_parts = []
             name = node.name.value
             class_name = node.parent.__class__.__name__[0:-4]
             if class_name in ['AttributeNode', 'TagNode']:
-                node.
+                pass
             elif class_name == 'NamespaceNode':
+                pass
             else:
                 continue
             node.name.value = '.'.join(name_parts)
@@ -140,28 +142,31 @@ class AbstractFilesystemAction(IFilesystemAction):
 class ReaddirAction(AbstractFilesystemAction):
     '''
         Action implementation for readdir FS api operation. One condition is obligatory:
-            1. Context must have B{path} member correctly initialized, path must be
-            grammaticaly correct. 
+            1. Context must have B{path} member correctly initialized. Path must be
+            grammaticaly valid to perform read of directory. 
     '''
 
     def perform(self):
         '''
         Interprets path.
 
-        @return: List of direntries (files or directories). For every item in
-        the list ivocation for getattr(full_path_to_item) must return
+        @return: List of direntries (files or directories names as strings). For
+        every item in the list ivocation for getattr(full_path_to_item) must return
         appropriate instance of Fuse.Stat type.
         '''
-        c = self.context 
-        c.path = PathNode(c.path)
+        context = self.context 
+        context.path = PathNode(c.path)
 
         if filter(lambda x: isinstance(x, UnknownNode), path.children()):
             raise VHFSException(msg = 'Unkonown Node : %s' % str(UnkonownNode), 
                 err_code = errno.ENOENT)
 
-        self.resolve_ambigouity(c.path)
-        self.perform_type_casting(c.path)
-        self.resolve_operation_names(c.path)
+        self.perform_type_casting(context.path)
+        self.resolve_ambigouity(context.path)
+
+        # e.g. @tag => Tag.Private.has(tag.name)
+        # @tagname. => Tag.Public.children(tagname), @Func. => Func.Public.Class.dir
+        # self.resolve_operation_names(c.path) 
 
         # filter nodes
 
@@ -169,7 +174,7 @@ class ReaddirAction(AbstractFilesystemAction):
 
         # sort nodes
 
-        interpreter = NodeInterpreter(c.path, self.context)
+        interpreter = NodeInterpreter(context, context.path)
         interpreter.eval()
 
         return context.out

@@ -2,27 +2,34 @@ import models as m
 import sys
 import re
 
+from sets import Set
+
 class Semantic:
 
     FILE_SQL_FILTER = 0x0001 
     '''@cvar: When operation adds some filtering to query on File table'''
+
     SQL_FILTER = 0x0002
     '''@cvar: General SQL filtering operations like: limit, offset etc.'''
+
     DIRENTRY_GENERATOR = 0x0004
     '''@cvar: This kind of operations don't modify context.query'''
+
     DIRENTRY_FILTER = 0x0008
     '''@cvar: Filter which can be applied for C{context.out} rather in contradiction
        to SQL_FILTER which can be only applied to C{context.query}'''
+
     REDUCIBLE_FILTER = 0x0020
     '''@cvar: Some filters may be reducted to one filter, e.g 
        /@Func.limit:10/@Func.limit:20 => /@Func.limit:20'''
 
+
     def __init__(self, flags):
         self._possible_flags = ['FILE_SQL_FILTER', 
-                          'SQL_FILTER', 
-                          'DIRENTRY_GENERATOR', 
-                          'DIRENTRY_FILTER', 
-                          'REDUCIBLE_FILTER']
+                                'SQL_FILTER', 
+                                'DIRENTRY_GENERATOR', 
+                                'DIRENTRY_FILTER', 
+                                'REDUCIBLE_FILTER']
 
         for item in self._possible_flags: 
             exec('self.%(field_name)s = ((Semantic.%(flag)s & flags) != 0) ' \
@@ -33,11 +40,12 @@ class Semantic:
         for flag in self._possible_flags:
             if eval('self.%(field_name)s' % {'field_name' : flag.lower() }):
                 flags.append(flag)
-        return ' | '.join(flags)
+        return "<# Semantic " + ' | '.join(flags) + " >"
 
 class Registry:
 
-    _entries = []
+    _entries = {}
+    _namespaces = []
 
     class Entry:
         pass
@@ -56,7 +64,9 @@ class Registry:
         '''
         Add new entry to the registry.
         '''
-        cls._entries.append(cls.OperationEntry(operation, semantic))
+        cls._entries[operation] = (cls.OperationEntry(operation, semantic))
+        cls._namespaces.append(operation.split('.')[0])
+        cls._namespaces = list(Set(cls._namespaces))
 
     @classmethod
     def semantic(cls, operation):
@@ -69,7 +79,47 @@ class Registry:
         for entry in cls._entries:
             if entry.operation == operation:
                 return entry.semantic
-    
+
+    @classmethod
+    def is_namespace_operation(cls, namespace, name, is_public = True, is_instance = True):
+        '''
+        Check whether operation with given C{name} is operation supported by
+        given C{namespace}. Default search for public and instance operations.
+            
+        @param namespace Name of the namespace
+        @type namespace str
+
+        @param name Name of the operation
+        @type name str
+
+        @param is_public Flag points if method is public or private
+        @type bool 
+
+        @param is_instance Flag points if method is instance or class method (static)
+        @type bool 
+
+        @return True if operation is provided by namespace, false if not.
+        @rtype bool
+        '''
+        operation_name = ("%(namespace)s.%(scope)s" 
+            % {'namespace' : namespace, 'scope' : 'Public' if is_public else 'Private'})
+        if not is_instance:
+            operation_name += '.Class'
+        operation_name += '.' + name
+        return cls._entries.has_key(operation_name)
+
+    @classmethod
+    def get_namespaces_by_operation(cls, name, is_public = True, is_instance = True):
+        namespaces = []
+        for namespace in cls._namespaces:
+            if cls.is_namespace_operation(namespace, name, is_public, is_instance):
+                namespaces.append(namespace)
+        return namespaces
+
+    @classmethod
+    def get_namespaces(cls):
+        return cls._namespaces
+
 
 def semantic(semantic_indicator):
     '''
@@ -105,5 +155,4 @@ class Namespace(object):
         '''
         pass
           
-
 from namespaces import *

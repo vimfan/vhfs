@@ -234,6 +234,8 @@ def p_attr_node(t):
     }
     func = FuncNode(name = mapping[t[2]], args = [t[3]])
     t[0] = AttributeNode(name = t[1], func_node = func)
+
+    func.instance_method = True
     func.parent = t[0]
 
 def p_type_casted_value(t):
@@ -260,6 +262,8 @@ def p_file_node(t):
     elif len(t) == 3:
         t[0] = FileNode(name = t[1], func_node = t[2])
         t[2].parent = t[0]
+
+        func_node.instance_method = True
 
 def p_func_node(t):
     '''func_node : FUNC ARG_SPECIFIER args

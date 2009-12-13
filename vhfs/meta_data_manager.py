@@ -1,8 +1,11 @@
-import models
 import singleton
 import errno
+
+import operations
+import models
+
 from parser import *
-from interpreter import *
+from interpreters import *
 
 class MetaDataManager(singleton.Singleton):
 
@@ -11,17 +14,8 @@ class MetaDataManager(singleton.Singleton):
         self._tag_names  = None
         self._attrs      = None
         self._attr_keys  = None
-        self.__namespaces = []
-        for name in dir(models):
-            try:
-                to_eval = 'issubclass(models.%s, models.Namespace)' % name
-                is_namespace = eval(to_eval)
-                if is_namespace and not name == 'Namespace':
-                    self.__namespaces.append(name)
-            except:
-                pass
+        self._namespaces = operations.Registry.get_namespaces()
 
-        logging.debug("NAMESPACES: %s" % `self.__namespaces`)
         self.refresh_tags()
         self.refresh_attrs()
 
@@ -96,30 +90,27 @@ class MetaDataManager(singleton.Singleton):
         self._tag_names = [t.name for t in self._tags]
 
     def refresh_attrs(self):
-        self._attrs      = models.Attribute.query().group_by(models.Attribute.key).all()
-        self._attr_keys  = [a.key for a in self._attrs] 
+        self._attrs = models.Attribute.query().group_by(models.Attribute.key).all()
+        self._attr_keys = [a.key for a in self._attrs] 
         self._attr_keys += models.File.table.columns.keys()
 
     def is_tag(self, name):
-        return [False, True][name in self._tag_names]
+        return True if name in self._tag_names else False
 
     def is_attribute(self, name):
-        return [False, True][name in self._attr_keys]
+        return True if name in self._attr_keys else False
 
     def is_namespace(self, name):
-        return [False, True][name in self.__namespaces]
+        return True if name in self._namespaces else False
 
-    def is_only(self, name, cls_name):
+    def get_types_by_name(name):
+        types = []
         possible_classes = ['Attribute', 'Tag', 'Namespace']
-        other_counter    = 0
-        possible_classes.remove(cls_name)
         for n in possible_classes:
             to_eval = 'self.is_%s(name)' % n.lower()
             if eval(to_eval):
-                other_counter += 1
-        to_eval = 'self.is_%s(name)' % cls_name.lower()
-        return [False, True][other_counter == 0 and eval(to_eval)]
-            
+                types.append(name)
+        return types
 
     def is_operation_of(self, operation, namespace):
         to_eval = 'models.%s.Op' % namespace

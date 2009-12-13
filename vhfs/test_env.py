@@ -8,7 +8,7 @@ setup_all()
 create_all()
 
 import parser
-import interpreter
+import interpreters
 import copy
 
 import nodes

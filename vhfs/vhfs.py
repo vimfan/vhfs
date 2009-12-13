@@ -463,10 +463,13 @@ class VHFS(fuse.Fuse):
         context = self.context
         context.path = path
         context.offset = offset
+
         try:
+
             readdir_action = ReaddirAction(context)
-            readdir_action.perform()
-		    for item in context.out:
+            out = readdir_action.perform()
+
+		    for item in out:
 			    yield fuse.Direntry(str(item))
 
         except VHFSException, e:

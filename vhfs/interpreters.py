@@ -30,24 +30,25 @@ class Interpreter(IInterpreter):
     def __init__(self, context):
         self._context = context
 
-    def eval(self):
-        '''
-        Performs parsing for at least one path (self._context.path), and if
-        second path exists (set self._context.path2) it invokes appropriate
-        interpreter at least one time.
-        '''
+    #def eval(self):
+        #'''
+        #Performs parsing for at least one path (self._context.path), and if
+        #second path exists (set self._context.path2) it invokes appropriate
+        #interpreter at least one time.
+        #'''
         # PathNodeInterpreter implementation decides how many steps it needs,
         # so self._context.steps_num may be changed by ivoked interpreter
-        while self._context.curr_step < self._context.steps_num:
-            interpreter = Interpreter(self._context)
-            self._context.curr_step += 1
+        #while self._context.curr_step < self._context.steps_num:
+            #action = build_action()
+            #action.perform()
+            #self._context.curr_step += 1
 
-        return self._context.out
+        #return self._context.out
 
-    def build_interpreter(self):
-        class_name = self._context.operation.capitalize() + 'Interpreter'
-        interpreter = eval('%s(self._context)' % class_name)
-        interpreter.eval()
+    #def build_action(self):
+        #class_name = self._context.operation.capitalize() + 'Action'
+        #action = eval('%s(self._context)' % class_name)
+        #return action
 
 class AbstractNodeInterpreter(IInterpreter):
 
@@ -93,14 +94,12 @@ class NodeInterpreter(AbstractNodeInterpreter):
         self.interneter_impl = None
 
     def eval(self):
-        interpreter_impl_class_name = self.build_interpreter_class_name()
-        self.interpreter_impl = eval('NodeInterpreter.%s(self.node, self.context)' %
-                                      interpreter_impl_class_name)
-        self.interpreter_impl.eval()
+        self.build_interpreter().eval()
 
-    def build_interpreter_class_name(self):
-        return self.node.__class__.__name__ + 'Interpreter'
-        
+    def build_interpreter(self):
+        interpreter_impl_class_name = self.node.__class__.__name__ + 'Interpreter'
+        return eval('NodeInterpreter.%s(self.node, self.context)' %
+                    interpreter_impl_class_name)
 
     class PathNodeInterpreter(AbstractNodeInterpreter):
         
@@ -112,100 +111,132 @@ class NodeInterpreter(AbstractNodeInterpreter):
             self.eval_children()
 
     class NamespaceNodeInterpreter(AbstractNodeInterpreter):
+
         def eval(self):
-            logging.debug('NamespaceNodeInterpreter')
+            logging.debug('NamespaceNodeInterpreter.eval_children() : Start')
             self.eval_children()
+            logging.debug('NamespaceNodeInterpreter.eval_children() : End')
 
     class TagNodeInterpreter(AbstractNodeInterpreter):
+
         def eval(self):
-            logging.debug('TagNodeInterpreter')
+            logging.debug('TagNodeInterpreter.eval_children() : Start')
             self.eval_children()
+            logging.debug('TagNodeInterpreter.eval_children() : End')
+            logging.debug('TagNodeInterpreter.eval() : Start')
             operations.eval(Tag, self.node.name.value, 
                 self.node.func_node.name.value, *self.node.func_node.args)
+            logging.debug('TagNodeInterpreter.eval() : End')
 
 
     class AttributeNodeInterpreter(AbstractNodeInterpreter):
+
         def eval(self):
-            logging.debug('AttributeNodeInterpreter')
+            logging.debug('AttributeNodeInterpreter.eval_children() : Start')
             self.eval_children()
+            logging.debug('AttributeNodeInterpreter.eval_children() : End')
+            logging.debug('AttributeNodeInterpreter.eval() : Start')
             operations.eval(Attribute, self.node.name.value, 
-                        self.node.func_node.name, *self.node.func_node.args)
+                            self.node.func_node.name, 
+                           *self.node.func_node.args)
+            logging.debug('AttributeNodeInterpreter.eval() : End')
 
     class FileNodeInterpreter(AbstractNodeInterpreter):
+
         def eval(self):
-            logging.debug('TagNodeInterpreter')
+            logging.debug('FileNodeInterpreter.eval_children() : Start')
             self.eval_children()
+            logging.debug('FileNodeInterpreter.eval_children() : End')
 
     class FuncNodeInterpreter(AbstractNodeInterpreter):
-        pass
+
+        def eval(self):
+            logging.debug('FuncNodeInterpreter.eval_children() : Start')
+            self.eval_children()
+            logging.debug('FuncNodeInterpreter.eval_children() : End')
+            
 
     class AmbigousNodeInterpreter(AbstractNodeInterpreter):
+
         def eval(self):
             '''
-            Resolves type of the given node by checking its operation and
-            metadata information stored in database backend. In its parent node
-            replace reference to the given node by new created node.
+            Resolves type of the given node by checking
+            1. metadata stored in database 
+            2. its operation (specified by func_node which is subnode of given node) 
 
-            @param node: Node to resolve ambiguity
-            @type node: AmbigousNode
+            After resolving it replaces reference to the given node by new created
+            one in its parent.
             '''
             new_node_type = None
-            possible_classes = ['Attribute', 'Tag', 'Namespace']
-            for cls_name in possible_classes:
+            node = self.node
+            node_name = self.node.name.value
+            operation_name = node.func_node.name.value 
 
-                if self._metadata_mgr.is_only(self.node.name.value, cls_name):
-                    new_node_type = eval(cls_name + 'Node')
+            if self._metadata_mgr.is_namespace(node.name.value):
 
-                if new_node_type is None:
+                namespace_name = node_name
 
-                    if node.func_node is None:
+                if operations.Registry.is_namespace_operation(namespace_name, 
+                                                              operation_name, 
+                                                              is_instance = False):
+                    new_node_type = NamespaceNode
+            else:
+
+                if self._metadata_mgr.is_attribute(node_name):
+                    new_node_type = AttributeNode
+
+                if self._metadata_mgr.is_tag(node_name):
+
+                    if new_node_type == None:
                         new_node_type = TagNode
 
-                    elif node.func_node.name != UNSPECIFIED_SYM:
-                        operation_name = node.func_node.name 
-                        for cls in possible_classes:
-                            namespace = cls
-                            if cls == 'Namespace':
-                                op_name = m.NAMESPACE_METHOD_PREFIX + operation_name
-                                namespace = node.name
+                    else:
+                        # if node_name may be the name of a tag or name of an attribute
+                        # then it decides which to choose by the operation_name
+                        new_node_type = None
+
+                        if operations.is_namespace_operation('Attribute', operation_name):
+                            new_node_type = AttributeNode
+
+                        if operations.is_namespace_operation('Tag', operation_name):
+                            if new_node_type == None:
+                                new_node_type = TagNode
                             else:
-                                op_name = operation_name
+                                new_node_type = None
+                
+            if new_node_type is AttributeNode:
+                new_node = AttributeNode(name = node.name, 
+                                         func_node = node.func_node, 
+                                         parent = node.parent)
 
-                            if self._metadata_mgr.is_operation_of(op_name, namespace):
-                                new_node_type = eval(cls + 'Node')
-                                
-                if new_node_type is AttributeNode:
-                    new_node = AttributeNode(name = node.name, 
-                                             func_node = node.func_node, 
-                                             parent = parent)
-                elif new_node_type is TagNode:
-                    new_node  = TagNode(name = node.name, 
-                                        func_node = func_node, 
-                                        parent = parent)
-                elif new_node_type is NamespaceNode:
-                    new_node  = NamespaceNode(name = node.name, 
-                                              func_node = node.func_node, 
-                                              parent = parent)
-                else:
-                    new_node = None
+            elif new_node_type is TagNode:
+                new_node  = TagNode(name = node.name, 
+                                    func_node = func_node, 
+                                    parent = node.parent)
 
-                if new_node != None:
-                    parent.replace_subnode(node, new_node)
-                else:
-                    raise VHFSException(msg='Cannot resolve ambigous Node %s' 
-                                             % node, err_code = errno.EBADMSG)
+            elif new_node_type is NamespaceNode:
+                new_node  = NamespaceNode(name = node.name, 
+                                          func_node = node.func_node, 
+                                          parent = node.parent)
+            else:
+                new_node = None
 
+            if new_node != None:
+                parent.replace_children_node(node, new_node)
+
+            else:
+                raise VHFSException(msg='Cannot resolve ambigous Node %s' 
+                                         % node, err_code = errno.EBADMSG)
+            
     class TypeCastNodeInterpreter(AbstractNodeInterpreter):
         '''Class for interpreting nodes of type TypeCastNode'''
 
-        def eval(self, node):
+        def eval(self):
             '''
             Resolves type of the given node. Replace reference to the given node
             by new resolved node in his parent node.
-
-            @param node: Node to resolve using hint
-            @type node: TypeCastNode
             '''
+            node = self.node
             parent = node.parent
             type = node.type  
             value = node
@@ -216,7 +247,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
             except AttributeError, e:
                 exec 'import %s' % type_module
                 exec 'new_node = %s.cast("%s")' % (type_module + '.' + type_class, value)
-            parent.replace_subnode(node, new_node)
+            parent.replace_children_node(node, new_node)
 
     class ValueNodeInterpreter(AbstractNodeInterpreter):
         def eval(self, node):

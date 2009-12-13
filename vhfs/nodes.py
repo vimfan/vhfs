@@ -1,3 +1,4 @@
+import re
 import vhfs_exceptions as exc
 import parser
 
@@ -82,7 +83,6 @@ class Node(object):
         if (not isinstance(val, Node) and val <> None):
             val = ValueNode(val)
         super(Node, self).__setattr__(item, val)
-        
 
     def children(self):
         '''
@@ -135,11 +135,11 @@ class Node(object):
             @type old: Node
             @param new: Node to 
         '''
+        new.parent = self
         if self.name == old:
             self.name = new
         elif self.func_node == old:
             self.func_node = new
-            new.parent = self
         else:
             raise AttributeError()
 
@@ -154,6 +154,13 @@ class Node(object):
             self.func_node = None
         else:
             raise AttributeError()
+
+    def type_name():
+        match = re.search('(.*)Node$', self.__class__.__name__)
+        try:
+            return match.groups[0]
+        except:
+            raise Exception, "Classes extending Node must have Node prefix in its names"
         
 class PathNode(Node):
 
@@ -168,7 +175,7 @@ class PathNode(Node):
             self._nodes = filter(lambda item: isinstance(item, Node), path)
         elif isinstance(path, str):
             try:
-                self._nodes = NodeList(self.__parse(path), parent = self)
+                self._nodes = NodeList(self._parse(path), parent = self)
                 self.__init__(self._nodes)
             except Exception, e:
                 import sys
@@ -189,7 +196,7 @@ class PathNode(Node):
             return object.__setattr__(self, item, value)
         super(PathNode, self).__setattr__(item, value)
 
-    def __parse(self, path):
+    def _parse(self, path):
         '''
             Parse path with syntax error toleration on the last node.
             
@@ -208,11 +215,9 @@ class PathNode(Node):
             path_parts = filter(lambda x: x <> '', path_parts)
             path_parts = map(lambda x: '/' + x, path_parts)
             counter = len(path_parts)
-            #print "Exception: %s\n%s \n%s" % (e, sys.exc_info(), \
-                #traceback.extract_tb(sys.exc_traceback)) 
             for i in xrange(counter):
                 try:
-                    path_part = self.__parse(path_parts[i])
+                    path_part = self._parse(path_parts[i])
                     out += path_part
                 except Exception, e:
                     out += PathNode(UnknownNode(name = path_parts[i][1:]))
