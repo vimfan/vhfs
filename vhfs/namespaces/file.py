@@ -41,4 +41,12 @@ class File(Namespace):
             f = File.get_by(name = file_name)
             context.out = [t.name for t in f.tags]
 
+        @semantic(Semantic.CHECK_EXISTANCE)
+        def check_existance(context, file_name):
+            f = File.get_by(name = file_name)
+            if not f is None:
+                return True
+            else
+                return False
+
  

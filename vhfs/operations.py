@@ -148,11 +148,17 @@ def %s(f):
     return eval(decorator_name)
 
 class Namespace(object):
+
+    @classmethod
     def dir():
         '''
         Operation which lets user see all operations supported by
         the namespace.
         '''
+        pass
+
+    @classmethod
+    def ignore(cls):
         pass
           
 from namespaces import *

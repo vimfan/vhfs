@@ -287,16 +287,16 @@ class PathNode(Node):
 
 class FuncNode(Node):
 
-    def __init__(self, name, args = [], **kw):
+    def __init__(self, name, args = [], public = True, instance_method = True, **kw):
         super(FuncNode, self).__init__(name, **kw)
         self._args = NodeList(args, parent = self)
 
         # flag indicates whether operation is public or private
-        self.public = True
+        self.public = public
 
         # flag indicates whether operation is associated with particular instance
         # of some class (tag, attribute etc.)
-        self.instance_method = True
+        self.instance_method = instance_method
 
     def _set_public(self, value):
         object.__setattr__(self, '_public', bool(value))

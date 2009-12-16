@@ -91,13 +91,15 @@ class AbstractFilesystemAction(IFilesystemAction):
         for node in type_cast_nodes:
             NodeInterpreter(node, self._context).eval()
 
-    class Operation:
-        def __init__(self, name, is_public, is_instance):
-            pass
+    class OperationResolver:
+        def __init__(self, normal, last = None):
+            self.normal = normal
+            self.last = normal if last is None else last
 
-        
+        normal = propery(lambda self: copy.deepcopy(self.normal))
+        last = propery(lambda self: copy.deepcopy(self.last))
 
-    def resolve_operation_defaults(self, path, defaults = None, empties = None):
+    def resolve_operation_defaults(self, path, defaults = None, empties = None, lasts = None):
         '''
         Resolve all FuncNode's with name member set to: '' (empty string)
         or TagNodes with empty FuncNode child.
@@ -114,24 +116,49 @@ class AbstractFilesystemAction(IFilesystemAction):
         Nodes like:  
             - C{<AttributeNode <FuncNode ()>>} 
               sets to: C{<AttributeNode <FuncNode default()>>}
-            - C{<TagNode <FuncNode ()>>} 
+            - C{<TagNode <FuncNode ()>>}
               sets to: C{<TagNode <FuncNode children()>>}
             - C{<TagNode>} 
               sets to: C{<TagNode <FuncNode has()>>}
         '''
 
-        if defaults == None:
+        if defaults is None:
             defaults = {
-                AttributeNode : 'Public.values',
-                TagNode       : 'Public.children',
-                NamespaceNode : 'Public.dir'
+                AttributeNode : OperationResolver(
+                    normal = FuncNode('ignore', public = False, instance_method = False), 
+                    last   = FuncNode('values')
+                ),
+
+                FileNode : OperationResolver(
+                    normal = FuncNode('ignore', public = False, instance_method = False),
+                    last   = FuncNode('meta',   public = False, instance_method = True)
+                ),
+
+                NamespaceNode : OperationResolver(
+                    normal = FuncNode('ignore', public = False, instance_method = False)
+                    last = FuncNode('dir', public = False, instance_method = False)
+                ),
+
+                TagNode : OperationResolver( 
+                    normal = FuncNode('has', public = False, instance_method = True),
+                    last   = FuncNode('children', public = False, instance_method = True)
+                )
             }
 
-        if empties == None:
+        if empties is None:
             empties = {
-                TagNode       : 'Private.has',
-                NamespaceNode : 'Private.ignore'
+                AttributeNode : FuncNode('ignore', public = False, instance_method = False),
+                FileNode      : FuncNode('ignore', public = False, instance_method = False),
+                NamespaceNode : Funcnode('ignore', public = False, instance_method = False),
+                TagNode       : OperationResolver(
+                    normal = FuncNode('has', public = False, instance_method = True),
+                    last = 
             }
+
+        types = [AttributeNode, TagNode, NamespaceNode, FileNode]
+
+        for node_type in types:
+            pass
 
 
     def resolve_operation_names(self, path, func):
