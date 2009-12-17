@@ -7,22 +7,25 @@ from sets import Set
 class Semantic:
 
     FILE_SQL_FILTER = 0x0001 
-    '''@cvar: When operation adds some filtering to query on File table'''
+    '''@cvar: When operation adds some filtering to query on files table'''
 
     SQL_FILTER = 0x0002
     '''@cvar: General SQL filtering operations like: limit, offset etc.'''
 
     DIRENTRY_GENERATOR = 0x0004
-    '''@cvar: This kind of operations don't modify context.query'''
+    '''@cvar: Oerations which don't modify context.query, returns list of
+              direntries instead'''
 
     DIRENTRY_FILTER = 0x0008
-    '''@cvar: Filter which can be applied for C{context.out} rather in contradiction
-       to SQL_FILTER which can be only applied to C{context.query}'''
+    '''@cvar: Filter which can be applied for C{context.out} rather in
+              contradiction to SQL_FILTER which can be only applied to
+              C{context.query}'''
 
     REDUCIBLE_FILTER = 0x0020
     '''@cvar: Some filters may be reducted to one filter, e.g 
-       /@Func.limit:10/@Func.limit:20 => /@Func.limit:20'''
+              /@Func.limit:10/@Func.limit:20 => /@Func.limit:20'''
 
+    NONE_FILTER = 0x0040
 
     def __init__(self, flags):
         self._possible_flags = ['FILE_SQL_FILTER', 
@@ -30,11 +33,20 @@ class Semantic:
                                 'DIRENTRY_GENERATOR', 
                                 'DIRENTRY_FILTER', 
                                 'REDUCIBLE_FILTER']
+        self._flags = flags
+        
+    flags = property(lambda self: self._flags)
 
-        for item in self._possible_flags: 
-            exec('self.%(field_name)s = ((Semantic.%(flag)s & flags) != 0) ' \
-                % {'field_name' : item.lower(), 'flag' : item})
+    def __getattr__(self, item):
+        uppercase_item = item.upper()
+        if uppercase_item in self._possible_flags:
+            return bool(eval('Semantic.%s' % uppercase_item) & self.flags)
+        else:
+            AttributeError(item)
 
+    def is_set(self, mask):
+        return bool(self.flags & mask)
+        
     def __repr__(self):
         flags = []
         for flag in self._possible_flags:
@@ -53,6 +65,13 @@ class Registry:
     class OperationEntry(Entry):
 
         def __init__(self, operation, semantic_flags):
+            '''
+            @param operation: Operation name
+            @type operation: str
+
+            @param semantic_flags: Bitwise conjunction of flags from set: Semantic.*
+            @type: int
+            '''
             self.operation = operation
             self.semantic = Semantic(semantic_flags)
 
@@ -63,6 +82,14 @@ class Registry:
     def append_operation(cls, operation, semantic):
         '''
         Add new entry to the registry.
+
+        @param operation: String like Tag.Public.Class.dir, in general: {Namespace}.{Public|Private}[.Class].{operation}
+        @type operation: str
+
+        @param semantic: Semantic of given operation
+        @type semantic: Semantic
+
+        @return: None
         '''
         cls._entries[operation] = (cls.OperationEntry(operation, semantic))
         cls._namespaces.append(operation.split('.')[0])
@@ -72,6 +99,9 @@ class Registry:
     def semantic(cls, operation):
         '''
         Returns semantic of the operation given by E{operation}. 
+
+        @param operation: Operation
+        @type operation: instancemethod
 
         @return: Semantic indicator
         @rtype: Semantic

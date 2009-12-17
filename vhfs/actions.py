@@ -43,7 +43,7 @@ class Context(object):
 
     def __getattr__(self, item):
         try:
-            return self.__properties[item]
+            return self._properties[item]
         except KeyError:
             raise AttributeError(item)
 
@@ -92,14 +92,15 @@ class AbstractFilesystemAction(IFilesystemAction):
             NodeInterpreter(node, self._context).eval()
 
     class OperationResolver:
-        def __init__(self, normal, last = None):
-            self.normal = normal
-            self.last = normal if last is None else last
 
-        normal = propery(lambda self: copy.deepcopy(self.normal))
-        last = propery(lambda self: copy.deepcopy(self.last))
+        def __init__(self, normal, key_node = None):
+            self._normal = normal
+            self._key_node = normal if key_node is None else key_node
 
-    def resolve_operation_defaults(self, path, defaults = None, empties = None, lasts = None):
+        normal = propery(lambda self: copy.deepcopy(self._normal))
+        key_node = propery(lambda self: copy.deepcopy(self._key_node))
+
+    def resolve_operation_defaults(self, path, defaults = None, empties = None, key_nodes = None):
         '''
         Resolve all FuncNode's with name member set to: '' (empty string)
         or TagNodes with empty FuncNode child.
@@ -122,62 +123,107 @@ class AbstractFilesystemAction(IFilesystemAction):
               sets to: C{<TagNode <FuncNode has()>>}
         '''
 
-        if defaults is None:
-            defaults = {
-                AttributeNode : OperationResolver(
-                    normal = FuncNode('ignore', public = False, instance_method = False), 
-                    last   = FuncNode('values')
-                ),
+        defaults_skeleton = {
+            AttributeNode : OperationResolver(
+                normal   = FuncNode('ignore', public = False, instance_method = False), 
+                key_node = FuncNode('values', public = True,  instance_method = True)
+            ),
 
-                FileNode : OperationResolver(
-                    normal = FuncNode('ignore', public = False, instance_method = False),
-                    last   = FuncNode('meta',   public = False, instance_method = True)
-                ),
+            FileNode : OperationResolver(
+                normal   = FuncNode('ignore', public = False, instance_method = False),
+                key_node = FuncNode('meta',   public = False, instance_method = True)
+            ),
 
-                NamespaceNode : OperationResolver(
-                    normal = FuncNode('ignore', public = False, instance_method = False)
-                    last = FuncNode('dir', public = False, instance_method = False)
-                ),
+            NamespaceNode : OperationResolver(
+                normal   = FuncNode('ignore', public = False, instance_method = False)
+                key_node = FuncNode('dir',    public = False, instance_method = False)
+            ),
 
-                TagNode : OperationResolver( 
-                    normal = FuncNode('has', public = False, instance_method = True),
-                    last   = FuncNode('children', public = False, instance_method = True)
+            TagNode : OperationResolver( 
+                normal   = FuncNode('has',      public = False, instance_method = True),
+                key_node = FuncNode('children', public = False, instance_method = True)
+            )
+        }
+
+        empties_skeleton = {
+            AttributeNode : OperationResolver(
+                normal = FuncNode('ignore', public = False, instance_method = False)
+                ),
+            FileNode      : OperationResolver(
+                normal = FuncNode('ignore', public = False, instance_method = False)
+                ),
+            NamespaceNode : OperationResolver(
+                normal = Funcnode('ignore', public = False, instance_method = False),
+                ),
+            TagNode       : OperationResolver(
+                normal = FuncNode('has', public = False, instance_method = True))
                 )
-            }
+        }
 
-        if empties is None:
-            empties = {
-                AttributeNode : FuncNode('ignore', public = False, instance_method = False),
-                FileNode      : FuncNode('ignore', public = False, instance_method = False),
-                NamespaceNode : Funcnode('ignore', public = False, instance_method = False),
-                TagNode       : OperationResolver(
-                    normal = FuncNode('has', public = False, instance_method = True),
-                    last = 
-            }
+        if not defaults is None:
+            for key in defaults.iter_keys():
+                defaults_skeleton[key] = defaults[key]
+        defaults = defaults_skeleton
+            
+        if not empties is None:
+            for key in empties.iter_keys(): 
+                empties_skeleton[key] = empties[key]
+        empties = empties_skeleton
 
-        types = [AttributeNode, TagNode, NamespaceNode, FileNode]
+        key_node = path.key_node()
 
-        for node_type in types:
-            pass
+        for node in path.children():
 
+            curr_class = node.__class__
+            op_resolver = None
 
-    def resolve_operation_names(self, path, func):
+            if node.func_node = None:
+                op_resolver = empties[curr_class]
+            elif node.func_node.name.value == parser.UNSPECIFIED_SYM:
+                op_resolver = defaults[curr_class]
 
-        func_nodes = path.descendants_of_type(FuncNode)
+            if not op_resolver is None:
+                if not node is key_node:
+                    node.func_node = op_resolver.normal 
+                else:
+                    node.func_node = op_resolver.key_node
 
-        for node in func_nodes:
-            name_parts = []
-            name = node.name.value
-            class_name = node.parent.__class__.__name__[0:-4]
-            if class_name in ['AttributeNode', 'TagNode']:
-                pass
-            elif class_name == 'NamespaceNode':
-                pass
-            else:
-                continue
-            node.name.value = '.'.join(name_parts)
-                
+    def sort_nodes(self, path, order = None):
 
+        order_skeleton = [
+            Semantic.FILE_SQL_FILTER,
+            Semantic.SQL_FILTER,
+            Semantic.DIRENTRY_GENERATOR,
+            Semantic.DIRENTRY_FILTER,
+            Semantic.REDUCIBLE_FILTER
+        ]
+
+        if order is None:
+            order = order_skeleton
+
+        def metric(semantic):
+            '''
+            @param semantic: Semantic
+            @type semantic: Semantic
+
+            @param order: List defining order. 
+            @type order: list 
+            '''
+            for i in xrange(len(order)):
+                if semantic.is_set(order[i]):
+                    return i
+            raise VHFSException("Semantic is unuseful %s" % semantic)
+
+        def cmp(a, b):
+            '''
+            Function used to comparison.
+            '''
+            a_semantic = operation.Registry.semantic(a.func_node.operation_signature()) 
+            b_semantic = operation.Registry.semantic(b.func_node.operation_signature()) 
+            return metric(a_semantic) - metric(b_semantic)
+
+        path.children.sort(cmp)
+        
     def perform_reductions(self, path):
         '''
         Performs reductions of some reductable nodes.
@@ -194,8 +240,11 @@ class ReaddirAction(AbstractFilesystemAction):
 
     def resolve_operation_defaults(self, path):
         super(ReaddirAction, self).resolve_operation_defaults(path)
-        
 
+    def filter_nodes(self, path):
+        key_node = path.key_node()
+        if operations.Register.semantic()
+        
     def perform(self):
         '''
         Interprets path.
@@ -216,13 +265,16 @@ class ReaddirAction(AbstractFilesystemAction):
 
         # e.g. @tag => Tag.Private.has(tag.name)
         # @tagname. => Tag.Public.children(tagname), @Func. => Func.Public.Class.dir
-        # self.resolve_operation_names(c.path) 
+
+        self.resolve_operation_names(c.path) 
 
         # filter nodes
+        self.filter_nodes(c.path)
 
         # reduce nodes -> /@Func.limit:10/@Func.limit:200 => /@Func.limit:200
 
         # sort nodes
+        self.sort_nodes(c.path)
 
         interpreter = NodeInterpreter(context, context.path)
         interpreter.eval()

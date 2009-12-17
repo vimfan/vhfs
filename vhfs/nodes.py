@@ -55,9 +55,8 @@ class Node(object):
     PRINT_ID = False
 
     def __init__(self, name, func_node = None, parent = None):
+        # NOTE: self.__setattr__() is overriden
         self.parent = parent
-        if not isinstance(name, Node):
-            name = ValueNode(name)
         self.name = name
         self.func_node = func_node
 
@@ -83,6 +82,7 @@ class Node(object):
         if (not isinstance(val, Node) and val <> None):
             val = ValueNode(val)
         super(Node, self).__setattr__(item, val)
+        val.parent = self
 
     def children(self):
         '''
@@ -155,7 +155,7 @@ class Node(object):
         else:
             raise AttributeError()
 
-    def type_name():
+    def operation_namespace():
         match = re.search('(.*)Node$', self.__class__.__name__)
         try:
             return match.groups[0]
@@ -166,8 +166,8 @@ class PathNode(Node):
 
     def __init__(self, path = None, _name = 'Path', **kw):
         '''
-            @param path: Path
-            @type path: C{list} or C{str} or C{Node} or C{Path}
+        @param path: Path
+        @type path: C{list} or C{str} or C{Node} or C{Path}
         '''
         super(PathNode, self).__init__(name = _name, **kw)
         self._nodes = NodeList(parent = self)
@@ -188,8 +188,6 @@ class PathNode(Node):
         elif isinstance(path, Node):
             self._nodes.append(path)
         self._nodes = filter(lambda e: e <> None, self._nodes)
-        #for node in self._nodes:
-            #node.parent = self
 
     def __setattr__(self, item, value):
         if item in ['_nodes']:
@@ -198,16 +196,17 @@ class PathNode(Node):
 
     def _parse(self, path):
         '''
-            Parse path with syntax error toleration on the last node.
-            
-            @param path: String in format /foo/bar/dir/file
-            @type path: str
+        Parse path with syntax error toleration on the last node.
+        
+        @param path: String in format /foo/bar/dir/file
+        @type path: str
 
-            @return: Path
-            @rtype: PathNode
+        @return: Path
+        @rtype: PathNode
         '''
 
         out = PathNode()
+
         try:
             out = parser.yacc.parse(path)
         except exc.VHFSException, e:
@@ -241,9 +240,26 @@ class PathNode(Node):
     def __reversed__(self):
         return self._nodes.__reversed__()
 
+    def key_node(self):
+        '''
+        Method returns the most crucial node which determines semantic of many
+        actions. It's always last node which has one of semantics:
+        FILE_SQL_FILTER or DIRENTRY_GENERATOR
+
+        @return: The most crucial key node.
+        @rtype: Node
+        '''
+        for child in reversed(self.children()):
+            func_node = child.func_node
+            if operations.Registry.semantic(func_node.operation_signature) in [operations.Semantic.FILE_SQL_FILTER, operations.Semantic.DIRENTRY_GENERATOR]:
+                return child
+            
     def children(self):
         '''
             Returns children of path node.
+
+            @return: children nodes
+            @rtype: list
         '''
         return self._nodes
 
@@ -342,6 +358,21 @@ class FuncNode(Node):
     def remove_node(self, node):
         i = self.args.index(node)
         del self.args[i]
+
+    def operation_signature(self):
+        '''
+        Returns signature like: Tag.Public.Class.children
+
+        @rtype: str
+        '''
+        parent = func_node.parent()
+        parent_namespace = parent.operation_namespace()
+        operation_parts = [parent_namespace]
+        operation_parts.append('Public' if func_node.public else 'Private')
+        if not func_node.instance_method:
+            operation_parts.append('Class')
+        operation_parts.append(func_node.name.value)
+        return '.'.join(operation_parts)
 
 class FileNode(Node):
     pass
