@@ -320,37 +320,51 @@
 
 
 #Semantic()
-class Semantic(object):
+#class Semantic(object):
 
-    class AutoIncrementer:
-        @classmethod
-        def next(cls):
-            if not hasattr(cls, 'counter'):
-                cls.counter = 1
-            else:
-                cls.counter <<= 1
-            return cls.counter
+    #class AutoIncrementer:
+        #@classmethod
+        #def next(cls):
+            #if not hasattr(cls, 'counter'):
+                #cls.counter = 1
+            #else:
+                #cls.counter <<= 1
+            #return cls.counter
                 
 
-    OPERATION_FILE_FILTER        = AutoIncrementer.next()
-    OPERATION_TAG_FILTER         = AutoIncrementer.next()
-    OPERATION_ATTRIBUTE_FILTER   = AutoIncrementer.next()
-    OPERATION_SQL_FILTER         = AutoIncrementer.next()
-    OPERATION_DIRENTRY_FILTER    = AutoIncrementer.next()
-    OPERATION_DIRENTRY_GENERATOR = AutoIncrementer.next()
+    #OPERATION_FILE_FILTER        = AutoIncrementer.next()
+    #OPERATION_TAG_FILTER         = AutoIncrementer.next()
+    #OPERATION_ATTRIBUTE_FILTER   = AutoIncrementer.next()
+    #OPERATION_SQL_FILTER         = AutoIncrementer.next()
+    #OPERATION_DIRENTRY_FILTER    = AutoIncrementer.next()
+    #OPERATION_DIRENTRY_GENERATOR = AutoIncrementer.next()
 
-    FEATURE_KEY_NODE_CAPABLE     = AutoIncrementer.next()
+    #FEATURE_KEY_NODE_CAPABLE     = AutoIncrementer.next()
 
-    def __init__(self, mask = 0):
-        self._semantic_mask = mask
-        print dir(self)
+    #def __init__(self, mask = 0):
+        #self._semantic_mask = mask
+        #print dir(self)
     
-    def is_set(flag):
+    #def is_set(flag):
+        #pass
+
+    #def set(flag):
+        #pass
+
+#Semantic()
+#print Semantic.OPERATION_FILE_FILTER
+#print Semantic.OPERATION_TAG_FILTER
+
+class TestAbstract:
+    def filter(self):
+        self.filter_tags()
+
+    def filter_tags():
         pass
 
-    def set(flag):
-        pass
+class Test(TestAbstract):
+    def filter_tags(self):
+        print 'filter_tags()'
 
-Semantic()
-print Semantic.OPERATION_FILE_FILTER
-print Semantic.OPERATION_TAG_FILTER
+Test().filter()
+TestAbstract().filter()

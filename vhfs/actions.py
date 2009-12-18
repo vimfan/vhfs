@@ -102,7 +102,10 @@ class AbstractFilesystemAction(IFilesystemAction):
         '''
         def __init__(self, normal, key_node = None):
             self._normal = normal
-            self._key_node = normal if key_node is None else key_node
+            if key_node is None:
+                self._key_node = normal  
+            else: 
+                self._key_node = key_node
 
         normal = property(lambda self: copy.deepcopy(self._normal))
         key_node = property(lambda self: copy.deepcopy(self._key_node))

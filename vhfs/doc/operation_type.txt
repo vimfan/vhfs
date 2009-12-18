@@ -12,15 +12,9 @@ typy operacji:
 
 class Semantic(object):
 
-	def __init__(self, mask = 0):
-		self._semantic_mask = mask
+	def __init__(self, context):
+		self._context = context
 	
- 	def is_set(flag):
-		pass
-
-	def set(flag):
-		pass
-
 class Feature(Semantic):
 
 	def __init__(self, *args, **kw):
@@ -93,9 +87,14 @@ class DirentryGenerator(Generator):
 	def generate(self):
 		self.generate_direntries()
 
-class KeyNode(Feature):
+class KeyNodeCapable(Feature):
 	def nodes_to_remove():
 		pass
 
+class Values(AttributeFilter, KeyNodeCapable)
+	def nodes_to_remove():
+		pass
+
+	def filter_attributes(self)
 
 
