@@ -9,6 +9,12 @@ class Semantic:
     FILE_SQL_FILTER = 0x0001 
     '''@cvar: When operation adds some filtering to query on files table'''
 
+    TAG_SQL_FILTER = 0x0001 
+    '''@cvar: When operation adds some filtering to query on files table'''
+
+    ATTRIBUTE_SQL_FILTER = 0x0001 
+    '''@cvar: When operation adds some filtering to query on files table'''
+
     SQL_FILTER = 0x0002
     '''@cvar: General SQL filtering operations like: limit, offset etc.'''
 

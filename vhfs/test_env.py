@@ -16,6 +16,7 @@ import nodes
 #path = vhfs_parser.yacc.parse('/music:/c:children/bitrate:values/:limit 120#int/some_tag:/b/tag#tag:')
 s = '/@tag./@music./@jazz/@rock/@bitrate<50/@mod_dtime<10:00'
 path = nodes.PathNode(s)
+print path
 #path = parser.yacc.parse(path_string)
 
 #pr = path_interpreter.PathInterpreter(path)
@@ -82,6 +83,6 @@ path = nodes.PathNode(s)
 #Test.greater_than(1)
 
 
-import operations
-for entry in operations.Registry._entries:
-    print entry
+#import operations
+#for entry in operations.Registry._entries:
+    #print entry

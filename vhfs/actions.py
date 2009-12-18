@@ -75,6 +75,9 @@ class AbstractFilesystemAction(IFilesystemAction):
     def resolve_ambigouity(self, path):
         '''
         Resolves ambigouity when it's possible.
+
+        @param path: Path to resolve
+        @type path: PathNode
         '''
         ambigous_nodes = path.descendants_of_type(AmbigousNode)
         for node in ambigous_nodes:
@@ -92,15 +95,19 @@ class AbstractFilesystemAction(IFilesystemAction):
             NodeInterpreter(node, self._context).eval()
 
     class OperationResolver:
-
+        '''
+        Helper class used to store replaces for function nodes in two context:
+        1. Normal (when node of a path isn't key node
+        2. Key node (when node of a path is key node
+        '''
         def __init__(self, normal, key_node = None):
             self._normal = normal
             self._key_node = normal if key_node is None else key_node
 
-        normal = propery(lambda self: copy.deepcopy(self._normal))
-        key_node = propery(lambda self: copy.deepcopy(self._key_node))
+        normal = property(lambda self: copy.deepcopy(self._normal))
+        key_node = property(lambda self: copy.deepcopy(self._key_node))
 
-    def resolve_operation_defaults(self, path, defaults = None, empties = None, key_nodes = None):
+    def resolve_operation_defaults(self, path, defaults = None, empties = None):
         '''
         Resolve all FuncNode's with name member set to: '' (empty string)
         or TagNodes with empty FuncNode child.
@@ -135,7 +142,7 @@ class AbstractFilesystemAction(IFilesystemAction):
             ),
 
             NamespaceNode : OperationResolver(
-                normal   = FuncNode('ignore', public = False, instance_method = False)
+                normal   = FuncNode('ignore', public = False, instance_method = False),
                 key_node = FuncNode('dir',    public = False, instance_method = False)
             ),
 
@@ -156,7 +163,7 @@ class AbstractFilesystemAction(IFilesystemAction):
                 normal = Funcnode('ignore', public = False, instance_method = False),
                 ),
             TagNode       : OperationResolver(
-                normal = FuncNode('has', public = False, instance_method = True))
+                normal = FuncNode('has', public = False, instance_method = True)
                 )
         }
 
@@ -177,7 +184,7 @@ class AbstractFilesystemAction(IFilesystemAction):
             curr_class = node.__class__
             op_resolver = None
 
-            if node.func_node = None:
+            if node.func_node is None:
                 op_resolver = empties[curr_class]
             elif node.func_node.name.value == parser.UNSPECIFIED_SYM:
                 op_resolver = defaults[curr_class]
@@ -189,6 +196,16 @@ class AbstractFilesystemAction(IFilesystemAction):
                     node.func_node = op_resolver.key_node
 
     def sort_nodes(self, path, order = None):
+        '''
+        Performs sorting of C{path} respectively to the C{order}. Order is list which is permutation of flags defined in class Semantic.
+        i.e. Semantic.FILE_SQL_FILTER, Semantic.SQL_FILTER etc.
+
+        @param path: Path to perform sorting.
+        @type path: PathNode
+
+        @param order: Order given by list.
+        @type order: list
+        '''
 
         order_skeleton = [
             Semantic.FILE_SQL_FILTER,
@@ -218,8 +235,8 @@ class AbstractFilesystemAction(IFilesystemAction):
             '''
             Function used to comparison.
             '''
-            a_semantic = operation.Registry.semantic(a.func_node.operation_signature()) 
-            b_semantic = operation.Registry.semantic(b.func_node.operation_signature()) 
+            a_semantic = operation.Registry.semantic( a.func_node.operation_signature() ) 
+            b_semantic = operation.Registry.semantic( b.func_node.operation_signature() ) 
             return metric(a_semantic) - metric(b_semantic)
 
         path.children.sort(cmp)
@@ -241,9 +258,27 @@ class ReaddirAction(AbstractFilesystemAction):
     def resolve_operation_defaults(self, path):
         super(ReaddirAction, self).resolve_operation_defaults(path)
 
-    def filter_nodes(self, path):
+    def remove_nodes(self, path):
+
         key_node = path.key_node()
-        if operations.Register.semantic()
+        key_node_semantic = operations.Registry.semantic( key_node.func_node.operation_signature )
+
+        def remove_nodes_without_semantic(children_nodes, semantic):
+            '''
+            Remove all nodes with semantic given by C{semantic_a}, but leaves
+            those which has also C{semantic_b}. Condition is tested by is_set()
+            method of semantic class.
+            '''
+            for node in children_nodes:
+                semantic = operations.Registry.semantic( node.func_node.operation_signature )
+                if not semantic.is_set(semantic_b):
+                    node.parent().remove_children(node)
+
+        if key_node_semantic.is_set(Semantic.DIRENTRY_GENERATOR):
+            # remove all FILE_SQL_FILTER
+            remove_nodes_without_semantic(Semantic.DIRENTRY_FILTER | Semantic.REDUCIBLE_FILTER)
+            
+
         
     def perform(self):
         '''
@@ -267,9 +302,7 @@ class ReaddirAction(AbstractFilesystemAction):
         # @tagname. => Tag.Public.children(tagname), @Func. => Func.Public.Class.dir
 
         self.resolve_operation_names(c.path) 
-
-        # filter nodes
-        self.filter_nodes(c.path)
+        self.remove_nodes(c.path)
 
         # reduce nodes -> /@Func.limit:10/@Func.limit:200 => /@Func.limit:200
 

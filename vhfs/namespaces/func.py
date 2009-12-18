@@ -10,7 +10,7 @@ class Func(Namespace):
 
         class Class:
 
-            @semantic(Semantic.SQL_FILTER)
+            @semantic(Semantic.SQL_FILTER | Semantic.DIRENTRY_FILTER)
             def limit(context, limit, offset = 0):
                 limit  = int(limit)
                 offset = int(offset)
@@ -18,7 +18,7 @@ class Func(Namespace):
                     context.query = context.query.limit(limit)
                     Func.Public.Class.offset(context, offset)
 
-            @semantic(Semantic.SQL_FILTER)
+            @semantic(Semantic.SQL_FILTER | Semantic.DIRENTRY_FILTER)
             def offset(context, value):
                 value = int(value)
                 context.query.offset(value)

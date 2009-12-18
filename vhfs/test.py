@@ -237,38 +237,120 @@
 #Test.Public.bla()
 #print registry
 
-def switcher(a, b):
-    skeleton = '''
-def set_%(first)s(self, val):
-    self._%(first)s = val
-    self._%(second)s = not val
+#def switcher(a, b):
+    #skeleton = '''
+#def set_%(first)s(self, val):
+    #self._%(first)s = val
+    #self._%(second)s = not val
 
-def get_%(first)s(self):
-    return self._%(first)s
+#def get_%(first)s(self):
+    #return self._%(first)s
 
-def is_%(first)s(self):
-    return self._%(first)s\n'''
+#def is_%(first)s(self):
+    #return self._%(first)s\n'''
 
-    out = skeleton % {'first' : a, 'second' : b}
-    out += skeleton % {'first' : b, 'second' : a}
-    skeleton = '%(first)s = property(get_%(first)s, set_%(first)s)\n'
-    out += skeleton % {'first' : a}
-    out += skeleton % {'first' : b}
-    exec out
-    print out
+    #out = skeleton % {'first' : a, 'second' : b}
+    #out += skeleton % {'first' : b, 'second' : a}
+    #skeleton = '%(first)s = property(get_%(first)s, set_%(first)s)\n'
+    #out += skeleton % {'first' : a}
+    #out += skeleton % {'first' : b}
+    #exec out
+    #print out
 
 
 
-class Test:
-    def __init__(self):
-        self._public = True
-        self._private = False
-        self.classmethod = False
-        pass
+#class Test:
+    #def __init__(self):
+        #self._public = True
+        #self._private = False
+        #self.classmethod = False
+        #pass
 
-    switcher('public', 'private')
+    #switcher('public', 'private')
 
-t = Test()
+#t = Test()
 #print t.public
 #print t.private
-print dir(t)
+#print dir(t)
+
+#class SuperTest(object):
+    #def __init__(self):
+        #print "superTest"
+
+#class SuperTest2(object):
+    #def __init__(self):
+        #print "superTest2"
+
+#class Test(SuperTest, SuperTest2):
+    #pass
+
+    #def test(self):
+        #print "spoko"
+
+    #def __init__(self):
+        #super(Test, self).__init__()
+        #SuperTest.__init__(self)
+        #SuperTest2.__init__(self)
+        
+
+#Test()
+
+
+#class Semantic(object):
+
+    #OPERATION_FILE_FILTER = 1
+    #OPERATION_TAG_FILTER
+    #OPERATION_ATTRIBUTE_FILTER
+    #OPERATION_SQL_FILTER = 3
+    #OPERATION_DIRENTRY_FILTER = 4
+    #OPERATION_DIRENTRY_GENERATOR
+
+    #FEATURE_KEY_NODE_CAPABLE
+
+    #def __init__(self):
+        #self._flag_mask = 0
+        #print dir(Semantic)
+
+    #def is_set(flag):
+        #pass
+                   
+    #def set(flag):
+        #pass
+
+
+
+#Semantic()
+class Semantic(object):
+
+    class AutoIncrementer:
+        @classmethod
+        def next(cls):
+            if not hasattr(cls, 'counter'):
+                cls.counter = 1
+            else:
+                cls.counter <<= 1
+            return cls.counter
+                
+
+    OPERATION_FILE_FILTER        = AutoIncrementer.next()
+    OPERATION_TAG_FILTER         = AutoIncrementer.next()
+    OPERATION_ATTRIBUTE_FILTER   = AutoIncrementer.next()
+    OPERATION_SQL_FILTER         = AutoIncrementer.next()
+    OPERATION_DIRENTRY_FILTER    = AutoIncrementer.next()
+    OPERATION_DIRENTRY_GENERATOR = AutoIncrementer.next()
+
+    FEATURE_KEY_NODE_CAPABLE     = AutoIncrementer.next()
+
+    def __init__(self, mask = 0):
+        self._semantic_mask = mask
+        print dir(self)
+    
+    def is_set(flag):
+        pass
+
+    def set(flag):
+        pass
+
+Semantic()
+print Semantic.OPERATION_FILE_FILTER
+print Semantic.OPERATION_TAG_FILTER

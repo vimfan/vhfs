@@ -20,6 +20,10 @@ class File(Namespace):
 
     class Public:
 
+        #class Meta(DirentryGenerator):
+            #def do(self, file_name):
+                #pass
+
         @semantic(Semantic.DIRENTRY_GENERATOR)
         def meta(context, file_name):
             dirs = []
@@ -41,12 +45,8 @@ class File(Namespace):
             f = File.get_by(name = file_name)
             context.out = [t.name for t in f.tags]
 
-        @semantic(Semantic.CHECK_EXISTANCE)
+        #@semantic(Semantic.CHECK_EXISTANCE)
         def check_existance(context, file_name):
             f = File.get_by(name = file_name)
-            if not f is None:
-                return True
-            else
-                return False
-
+            return (not f is None)
  

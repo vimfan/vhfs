@@ -1,0 +1,101 @@
+typy operacji:
+1. Filtry plików (FILE) FILE_FILTER
+2. Filtry etykiet (Tag) TAG_FILTER
+	@Tag.all_like:"mus%" # context.query.filter(Tag.name.starts_with("mus%"))
+3. Filtry atrybutów (Attribute) ATTRIBUTE_FILTER
+	@Attribute.counters_less_than:50
+4. Filtry ogólne (SQL) limit, order, group by (?) SQL_FILTER
+	@Func.limit:10 # context.query.
+5. Filtry ogólne działające na zwróconych direntry (tak naprawdę stringach) DIRENTRY_FILTER
+6. Węzły generujące DIRENTRY_GENERATOR
+7. Węzły kluczowe KEY_NODE
+
+class Semantic(object):
+
+	def __init__(self, mask = 0):
+		self._semantic_mask = mask
+	
+ 	def is_set(flag):
+		pass
+
+	def set(flag):
+		pass
+
+class Feature(Semantic):
+
+	def __init__(self, *args, **kw):
+		super(Feature, self).__init__(*args, **kw)
+	
+
+class Operation(Semantic):
+	
+	def __init__(self, *args, **kw):
+		super(Operation, self).__init__(*args, **kw)
+
+	def execute():
+		pass
+
+
+class Filter(Operation):
+
+	def execute(self):	
+		self.filter(self)
+
+	def filter(self):
+		pass
+
+class Generator(Operation):
+	def execute(self):
+		self.generate(self)
+
+	def generate(self):
+		pass
+
+class FileFilter(Filter):
+	def __init__(self):
+		super(FileFilter, self).__init__()
+
+	def filter(self):
+		self.filter_files()
+
+class TagFilter(Filter):
+	def __init__(self):
+		super(TagFilter, self).__init__()
+
+	def filter(self):
+		self.filter_tags():
+
+class AttributeFilter(Filter):
+	def __init__(self):
+		super(AttributeFilter, self).__init__()
+
+	def filter(self):
+		self.filter_attributes()
+
+class SQLFilter(Filter):
+	def __init__(self):
+		super(SQLFilter, self).__init__()
+
+	def filter(self):
+		self.filter_by_sql()
+
+class DirentryFilter(Filter):
+	def __init__(self):
+		super(DirentryFilter, self).__init__()
+
+	def filter(self):
+		self.filter_direntries()
+
+class DirentryGenerator(Generator):
+	def __init__(self):
+		super(DirentryGenerator, self).__init__()
+
+	def generate(self):
+		self.generate_direntries()
+
+class KeyNode(Feature):
+	def nodes_to_remove():
+		pass
+
+
+

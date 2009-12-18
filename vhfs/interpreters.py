@@ -209,7 +209,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
                 new_node = None
 
             if new_node != None:
-                parent.replace_children_node(node, new_node)
+                parent.replace_children(node, new_node)
             else:
                 raise VHFSException(msg='Cannot resolve ambigous Node %s' 
                                          % node, err_code = errno.EBADMSG)
@@ -233,7 +233,7 @@ class NodeInterpreter(AbstractNodeInterpreter):
             except AttributeError, e:
                 exec 'import %s' % type_module
                 exec 'new_node = %s.cast("%s")' % (type_module + '.' + type_class, value)
-            parent.replace_children_node(node, new_node)
+            parent.replace_children(node, new_node)
 
     class ValueNodeInterpreter(AbstractNodeInterpreter):
         def eval(self, node):

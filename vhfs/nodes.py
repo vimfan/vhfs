@@ -81,8 +81,8 @@ class Node(object):
     def __setattr__(self, item, val):
         if (not isinstance(val, Node) and val <> None):
             val = ValueNode(val)
+            val.parent = self
         super(Node, self).__setattr__(item, val)
-        val.parent = self
 
     def children(self):
         '''
@@ -127,7 +127,7 @@ class Node(object):
             queue.extend(n.children()) 
         return ancestors
 
-    def replace_children_node(self, old, new):
+    def replace_children(self, old, new):
         '''
             Replace a children node with another node.
 
@@ -143,7 +143,7 @@ class Node(object):
         else:
             raise AttributeError()
 
-    def remove_node(self, node):
+    def remove_children(self, node):
         '''
             Removes given node from children.
 
@@ -263,7 +263,7 @@ class PathNode(Node):
         '''
         return self._nodes
 
-    def replace_children_node(self, old, new):
+    def replace_children(self, old, new):
         '''
             Replace old node with new node.
 
@@ -276,7 +276,7 @@ class PathNode(Node):
         i = self._nodes.index(old)
         self._nodes[i] = new 
        
-    def remove_node(self, node):
+    def remove_children(self, node):
         '''
             Remove node from a path.
 
@@ -340,8 +340,8 @@ class FuncNode(Node):
         super(FuncNode, self).__setattr__(item, value)
 
     def _repr_injection(self):
-        return (' ' + (['private', 'public'][int(self.is_public)]) 
-                    + (['.', '::'][int(self.is_class_method)]) + str(self.name) 
+        return (' ' + (['private', 'public'][int(self.public)]) 
+                    + (['.', '::'][int(self.instance_method)]) + str(self.name) 
                     + '(' 
                     + [','.join([str(arg) for arg in self.args]), ''][len(self.args) == 0] 
                     + ')')
@@ -351,11 +351,11 @@ class FuncNode(Node):
         l.extend(self.args)
         return filter(lambda x: x != None, l)
 
-    def replace_children_node(self, old, new_node):
+    def replace_children(self, old, new_node):
         i = self.args.index(old)
         self.args[i] = new_node
 
-    def remove_node(self, node):
+    def remove_children(self, node):
         i = self.args.index(node)
         del self.args[i]
 
