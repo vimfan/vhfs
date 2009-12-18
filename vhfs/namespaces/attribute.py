@@ -1,115 +1,146 @@
 from .operations import Namespace
-from .operations import semantic
-from .operations import Semantic
+from .operations import FileFilter
+from .operations import AttributeFilter
+from .operations import DirentryGenerator
+from .operations import KeyNodeCapable
 
 import models as m
+
+class FilterFilesByAttribute(FileFilter):
+
+    def __init__(self, context, attr_key, attr_value, *args, **kw):
+        super(FilterFilesByAttribute, self).__init__(context, *args, **kw)
+        self.attr_key = attr_key
+        self.attr_value = attr_value
+
+class FilterFilesByAttributeWithOperand(FilterFilesByAttribute):
+
+    def filter_with_operand(self, operand):
+        if Attribute.is_inherent_attr(self.attr_key):
+            self.context.query.filter(
+                eval('m.File.%(key)s %(operand)s self.attr_value' 
+                    % 'key' : self.attr_key, 'operand' : operand))
+        else:
+            self.context.query.filter(m.File.attributes.any( 
+                and_(eval('m.Attribute.value %s self.attr_value' % operand}, 
+                    m.Attribute.key == self.attr_key)))
+
+class AttributeDirentryGenerator(DirentryGenerator):
+    
+    def __init__(self, context, attr_key, *args, **kw):
+        super(AttributeDirentryGenerator, self).__init__(context, *args, **kw)
+        self.attr_key = attr_key
+
 
 class Attribute(Namespace):
 
     @staticmethod
     def is_inherent_attr(attr_key):
-        return [False, True][attr_key in m.File.table.columns.keys()]
+        return attr_key in m.File.table.columns.keys()
 
     class Private:          
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def negation(context, attr_key):
-            if Attribute.is_inherent_attr(attr_key):
-                context.query.limit(0)
-            else:
-                context.query.filter(
-                    not_(m.File.attributes.any( \
-                        (m.Attribute.key == attr_key ))))
+        class Negation(FilterFilesByAttribute)
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def default(context, attr_key):
-            context.out = m.Attribute.Public.values(context, attr_key)
+            def filter_files(self):
+                if Attribute.is_inherent_attr(self.attr_key):
+                    context.query.limit(0)
+                else:
+                    context.query.filter(
+                        not_(
+                            m.File.attributes.any( 
+                                (m.Attribute.key == attr_key ))))
+
+                
+        class Default(Public.Values):
+            pass
+ 
+            #def __init__(self, *args, **kw):
+                #super(Default, self).__init__(*args, **kw)
+                #self._values = Attribute.Public.Values(*args, **kw)
+            
+            #def generate_direntries(self):
+                #self._values.execute()
+
+
+        class Assign(FilterFilesByAttribute, AttributeCreator, AssociationCreator)
+            
+            def __init__(self, *args, **kw):
+                FilterFilesByAttribute.__init__(self, *args, **kw)
+                AttributeCreator.__init__(self, *args, **kw)
+                AssociationCreator.__init__(self, *args, **kw)
+
+                self._equal = Attribute.Public.Eq(*args, **kw)
+
+            def execute(self):
+                pass
+
+            def filter_files(self):
+                self._equal.filter_files()
 
     class Public:
                 
-        @semantic(Semantic.DIRENTRY_GENERATOR)
-        def values(context, attr_key):
-            context.out = [str('%s=%s') % (attr.key, attr.value) 
-                for attr in m.Attribute.query.filter(
-                    m.Attribute.key == attr_key).group_by(
-                        m.Attribute.value).all()]
+        class Values(AttributeDirentryGenerator):
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def lt(context, attr_key, value):
-            if Attribute.is_inherent_attr(attr_key):
-                context.query.filter(eval('m.File.%s' % attr_key) < value)
-            else:
-                context.query.filter(m.File.attributes.any( \
-                    and_(m.Attribute.value < value, 
-                         m.Attribute.key == attr_key)))
+            def generate_direntries(self):
+                pattern = '%(key)s=%(value)s' 
+                attributes = m.Attribute.query.filter(
+                                m.Attribute.key == attr_key).group_by(
+                                    m.Attribute.value).all():
+                f = lambda attr: pattern % {'key' : str(attr.key), 'value' : str(attr.value)
+                self.context.out = map(f, attributes)
+                    
+        class Lt(FilterFilesByAttributeWithOperand):
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def le(context, attr_key, value):
-            if Attribute.is_inherent_attr(attr_key):
-                context.query.filter(eval('m.File.%s' % attr_key) <= value)
-            else:
-                context.query.filter(m.File.attributes.any( \
-                    and_(m.Attribute.value <= value, 
-                         m.Attribute.key == attr_key)))
+            def filter_files(self):
+                self.filter_with_operand('<')
+                    
+        class Le(FilterFilesByAttributeWithOperand):
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def gt(context, attr_key, value):
-            if Attribute.is_inherent_attr(attr_key):
-                context.query.filter(eval('m.File.%s' % attr_key) > value)
-            else:
-                context.query.filter(m.File.attributes.any( \
-                    and_(m.Attribute.value > value, 
-                         m.Attribute.key == attr_key)))
+            def filter_files(self):
+                self.filter_with_operand('<=')
+ 
+        class Gt(FilterFilesByAttributeWithOperand):
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def ge(context, attr_key, value):
-            if Attribute.is_inherent_attr(attr_key):
-                context.query.filter(eval('m.File.%s' % attr_key) >= value)
-            else:
-                context.query.filter(m.File.attributes.any( \
-                    and_(m.Attribute.value >= value, 
-                         m.Attribute.key == attr_key)))
+            def filter_files(self):
+                self.filter_with_operand('>')
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def eq(context, attr_key, value):
-            if Attribute.is_inherent_attr(attr_key):
-                context.query.filter(eval('m.File.%s' % attr_key) == value)
-            else:
-                context.query.filter(m.File.attributes.any( \
-                    and_(m.Attribute.value == value, 
-                         m.Attribute.key == attr_key)))
+        class Ge(FilterFilesByAttributeWithOperand):
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def neq(context, attr_key, value):
-            if Attribute.is_inherent_attr(attr_key):
-                context.query.filter(eval('m.File.%s' % attr_key != value))
-            else:
-                context.query.filter(m.File.attributes.any( \
-                    and_(m.Attribute.value != value, 
-                         m.Attribute.key == attr_key)))
+            def filter_files(self):
+                self.filter_with_operand('>=')
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def like(context, attr_key, pattern):
-            if Attribute.is_inherent_attr(attr_key):
-                context.query.filter(eval('m.File.%s' % attr_key).like(pattern))
-            else:
-                context.query.filter(m.File.attributes.any(
-                    m.Attribute.value.like(pattern)))
+        class Eq(FilterFilesByAttributeWithOperand, AttributeCreator, AssociationCreator):
+            
+            def filter_files(self):
+                self.filter_with_operand('==')
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def regexp(context, attr_key, pattern):
+        class Neq(FilterFilesByAttributeWithOperand):
+            
+            def filter_files(self):
+                self.filter_with_operand('!=')
+
+
+        class Like(FilterFilesByAttribute):
+            
+            def filter_files(self):
+                if Attribute.is_inherent_attr(self.attr_key):
+                    context.query.filter(eval('m.File.%s' % self.attr_key).like(self.attr_value))
+                else:
+                    context.query.filter(m.File.attributes.any(
+                        m.Attribute.value.like(self.attr_value)))
+
+        class Regexp(FilterFilesByAttribute):
             '''
             Operation semantically similar to regexp, but instead of regexp()
             we're using glob() SQLite builtin function.
             '''
-            if Attribute.is_inherent_attr(attr_key):
-                context.query.filter(eval('m.File.%s' % attr_key).glob(pattern))
-            else:
-                context.query.filter(m.File.attributes.any( \
-                    m.Attribute.value.op('glob')(pattern)))
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def assign(context, attr_key, attr_val):
-            return cls.equal(context, attr_key, attr_val)
-    
+            def filter_files(self):
+                if Attribute.is_inherent_attr(self.attr_key):
+                    context.query.filter(eval('m.File.%s' % attr_key).glob(self.attr_value))
+                else:
+                    context.query.filter(m.File.attributes.any( \
+                        m.Attribute.value.op('glob')(self.attr_value)))
+
 

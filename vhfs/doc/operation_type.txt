@@ -1,100 +1,12 @@
-typy operacji:
-1. Filtry plików (FILE) FILE_FILTER
-2. Filtry etykiet (Tag) TAG_FILTER
-	@Tag.all_like:"mus%" # context.query.filter(Tag.name.starts_with("mus%"))
-3. Filtry atrybutów (Attribute) ATTRIBUTE_FILTER
-	@Attribute.counters_less_than:50
-4. Filtry ogólne (SQL) limit, order, group by (?) SQL_FILTER
-	@Func.limit:10 # context.query.
-5. Filtry ogólne działające na zwróconych direntry (tak naprawdę stringach) DIRENTRY_FILTER
-6. Węzły generujące DIRENTRY_GENERATOR
-7. Węzły kluczowe KEY_NODE
+t = TagNode(FuncNode('has'), name='music') ( = PathNode.get_key_node())
 
-class Semantic(object):
+for n in t.siblings_to_remove():
+	t.parent().remove_children(n)
 
-	def __init__(self, context):
-		self._context = context
-	
-class Feature(Semantic):
+readdir: /@Func.limit:10/@Func.order/@Tag.all/@Attribute.all_like:'bit%'/@bitrate < 128/@bitrate=50/@media.children/@music
+	t.siblings_to_remove() zwraca wszystkie węzly - generatory, oraz ignore
+		wszystkie węzły FILTER pozostawia
 
-	def __init__(self, *args, **kw):
-		super(Feature, self).__init__(*args, **kw)
-	
-
-class Operation(Semantic):
-	
-	def __init__(self, *args, **kw):
-		super(Operation, self).__init__(*args, **kw)
-
-	def execute():
-		pass
-
-
-class Filter(Operation):
-
-	def execute(self):	
-		self.filter(self)
-
-	def filter(self):
-		pass
-
-class Generator(Operation):
-	def execute(self):
-		self.generate(self)
-
-	def generate(self):
-		pass
-
-class FileFilter(Filter):
-	def __init__(self):
-		super(FileFilter, self).__init__()
-
-	def filter(self):
-		self.filter_files()
-
-class TagFilter(Filter):
-	def __init__(self):
-		super(TagFilter, self).__init__()
-
-	def filter(self):
-		self.filter_tags():
-
-class AttributeFilter(Filter):
-	def __init__(self):
-		super(AttributeFilter, self).__init__()
-
-	def filter(self):
-		self.filter_attributes()
-
-class SQLFilter(Filter):
-	def __init__(self):
-		super(SQLFilter, self).__init__()
-
-	def filter(self):
-		self.filter_by_sql()
-
-class DirentryFilter(Filter):
-	def __init__(self):
-		super(DirentryFilter, self).__init__()
-
-	def filter(self):
-		self.filter_direntries()
-
-class DirentryGenerator(Generator):
-	def __init__(self):
-		super(DirentryGenerator, self).__init__()
-
-	def generate(self):
-		self.generate_direntries()
-
-class KeyNodeCapable(Feature):
-	def nodes_to_remove():
-		pass
-
-class Values(AttributeFilter, KeyNodeCapable)
-	def nodes_to_remove():
-		pass
-
-	def filter_attributes(self)
+symlink: /home/file.mp3 /vhfs/@music/@jazz.children/ => /home/file.mp3 /vhfs/@music.Private.assign/@jazz.Private.assign
 
 

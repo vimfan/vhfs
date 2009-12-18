@@ -355,16 +355,32 @@
 #print Semantic.OPERATION_FILE_FILTER
 #print Semantic.OPERATION_TAG_FILTER
 
-class TestAbstract:
-    def filter(self):
-        self.filter_tags()
+#class TestAbstract:
+    #def filter(self):
+        #self.filter_tags()
 
-    def filter_tags():
-        pass
+    #def filter_tags():
+        #pass
 
-class Test(TestAbstract):
-    def filter_tags(self):
-        print 'filter_tags()'
+#class Test(TestAbstract):
+    #def filter_tags(self):
+        #print 'filter_tags()'
 
-Test().filter()
-TestAbstract().filter()
+#Test().filter()
+#TestAbstract().filter()
+
+class Test(object):
+    def __init__(self, context, file_name):
+        self.context = context
+        self.file_name = file_name
+
+    def __repr__(self):
+        return str(self.context) + " " + str(self.file_name)
+
+class SubTest(Test):
+    def __init__(self, *args, **kw):
+        super(SubTest, self).__init__(*args, **kw)
+
+
+print SubTest('raz', 'dwa')
+

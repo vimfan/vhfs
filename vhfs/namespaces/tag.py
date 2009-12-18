@@ -1,70 +1,97 @@
 from .operations import Namespace
-from .operations import semantic
-from .operations import Semantic
+from .operations import FileFilter
+from .operations import DirentryGenerator
 
 import models as m
+
+class TagDirentryGenerator(DirentryGenerator):
+
+    def __init__(self, context, tag_name, *args, **kw):
+        super(TagDirentryGenerator, self).__init__(context, *args, **kw)
+        self.tag_name = tag_name
+
+class FilterFilesByTag(FileFilter):
+    
+    def __init__(self, context, tag_name, *args, **kw):
+        super(FileFilterByTag, self).__init__(context, *args, **kw)
+        self.tag_name = tag_name
+        
 
 class Tag(Namespace):
 
     class Public:
         '''Pseudo class grouping all public methods for the Tag namespace'''
 
-        @semantic(Semantic.DIRENTRY_GENERATOR)
-        def children(context, tag_name):
-            '''
-            Returns children of C{tag_name}
 
-            @param tag_name: Name of the tag.
-            @type tag_name: C{str}
-            '''
-            tag = Tag.get_by(name = tag_name)
-            context.out = [item.name for item in tag.children_]
+        class Children(TagDirentryGenerator):
+
+            def generate_direntries(self):
+                '''
+                Returns children of C{tag_name}
+                '''
+                tag = Tag.get_by(name = self.tag_name)
+                context.out = [item.name for item in tag.children_]
+
+
+        class Descendants(TagDirentryGenerator):
+
+            def generate_direntries(self):
+                '''
+                Returns descendants of a given tag.
+                '''
+                pass
+
+
+        class Parent(TagDirentryGenerator):
             
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def descendants(context, tag_name):
-            '''
-            Returns descendants of C{tag_name}
+            def generate_direntries(self):
+                '''
+                Return parent tag of given tag.
+                '''
+                pass
 
-            @param context: Current context
-            @type context: C{Context}
-            @param tag_name: Name of the tag.
-            @type tag_name: C{str}
-            '''
-            pass
 
-        @semantic(Semantic.DIRENTRY_GENERATOR)
-        def parent(context, tag_name):
-            pass
+        class Ancestors(TagDirentryGenerator):
+            
+            def generate_direntries(self):
+                '''
+                Return ancestors of given tag.
+                '''
+                pass
 
-        @semantic(Semantic.DIRENTRY_GENERATOR)
-        def ancestors(context, tag_name):
-            pass
 
-        @semantic(Semantic.DIRENTRY_GENERATOR)
-        def siblings(context, tag_name):
-            pass
+        class Siblings(TagDirentryGenerator):
+            
+            def generate_direntries(self):
+                '''
+                Return siblings of given tag.
+                '''
+                pass
+
 
         class Class:
             '''
             Pseudo class grouping all public class methods
             '''
 
-            @semantic(Semantic.DIRENTRY_GENERATOR)
-            def all(context, pattern):
+            
+            class All(TagDirentryGenerator):
                 '''
                 Prepare all indexed tags
                 '''
-                pass
+                def generate_direntries(self):
+                    self.context.out = [item.name for item in m.Tag.query.all()]
 
-            @semantic(Semantic.FILE_SQL_FILTER)
-            def any(name, pattern):
+            
+            class Any(TagDirentryGenerator):
                 '''
-                Filter only files which has some tags.
+                Filter only files which has at least one tag.
                 '''
-                pass
+                def generate_direntries(self):
+                    self.context.out = [item.name for item in m.Tag.query.all()]
 
-            @semantic(Semantic.FILE_SQL_FILTER)
-            def like(name, pattern):
+
+            class Like(TagDirentryGenerator):
                 '''
                 Prepare all tags which names are like pattern.
                 
@@ -74,8 +101,13 @@ class Tag(Namespace):
                         - 'music'
                         - 'musician'
                         - 'muse'
+                    so:
+                    
+                    ls @Tag.like:'mus%'
+                    @music @musician @muse
                 '''
-                pass
+                def generate_direntries(self):
+                    self.context.out = []
 
     class Private:
         '''
@@ -94,38 +126,38 @@ class Tag(Namespace):
                 descs.extend( d.children_ )
             return descs
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def has(context, tag_name):
-            '''
-            Filter files which has tag with name given by tag_name.
-            '''
-            descendants = Tag.Private._descendants(tag_name)
-            context.query.filter(m.File.tags.any(
-                m.Tag.name.in_([d.name for d in descendants])))
-        
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def default(context, tag_name):
+        class Has(FilterFilesByTag):
+
+            def filter_files(self):
+                '''
+                Filter files which has tag with name given by tag_name.
+                '''
+                descendants = Tag.Private._descendants(self.tag_name)
+                context.query.filter(m.File.tags.any(
+                    m.Tag.name.in_([d.name for d in descendants])))
+ 
+                      
+        class Default(Has)
             '''
             Implements default operation for Tag, i.e. operation when
             invocation is like: /@tagname.
 
             By default it invokes children operation.
 
-            @param context: Current context
-            @param tag_name: Name of the tag
             '''
-            Tag.Public.children(context, tag_name)
+            pass
 
-        @semantic(Semantic.FILE_SQL_FILTER)
-        def negation(context, tag_name):
+
+        class Negation(FilterFilesByTag)
             '''
             Implements negation operator. E.g.:
                 - /not @jazz, 
                 - /not@music
             '''
-            context.query.filter( \
-                not_(
-                    m.File.tags.any( \
-                        m.Tag.name.in_( [d.name for d in descs] ))))
+            def filter_files(self):
+                self.context.query.filter( 
+                    not_(
+                        m.File.tags.any( 
+                            m.Tag.name.in_( [d.name for d in descs] ))))
 
 

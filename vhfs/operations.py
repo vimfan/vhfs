@@ -4,61 +4,166 @@ import re
 
 from sets import Set
 
-class Semantic:
+class Semantic(object):
 
-    FILE_SQL_FILTER = 0x0001 
-    '''@cvar: When operation adds some filtering to query on files table'''
+	def __init__(self, context):
+		self.context = context
 
-    TAG_SQL_FILTER = 0x0001 
-    '''@cvar: When operation adds some filtering to query on files table'''
 
-    ATTRIBUTE_SQL_FILTER = 0x0001 
-    '''@cvar: When operation adds some filtering to query on files table'''
+class Feature(Semantic):
+    
+	def __init__(self, *args, **kw):
+		super(Feature, self).__init__(*args, **kw)
 
-    SQL_FILTER = 0x0002
-    '''@cvar: General SQL filtering operations like: limit, offset etc.'''
 
-    DIRENTRY_GENERATOR = 0x0004
-    '''@cvar: Oerations which don't modify context.query, returns list of
-              direntries instead'''
+class Operation(Semantic):
+	
+	def __init__(self, *args, **kw):
+		super(Operation, self).__init__(*args, **kw)
 
-    DIRENTRY_FILTER = 0x0008
-    '''@cvar: Filter which can be applied for C{context.out} rather in
-              contradiction to SQL_FILTER which can be only applied to
-              C{context.query}'''
+	def execute():
+		pass
 
-    REDUCIBLE_FILTER = 0x0020
-    '''@cvar: Some filters may be reducted to one filter, e.g 
-              /@Func.limit:10/@Func.limit:20 => /@Func.limit:20'''
 
-    NONE_FILTER = 0x0040
+class KeyNodeCapable(Feature):
 
-    def __init__(self, flags):
-        self._possible_flags = ['FILE_SQL_FILTER', 
-                                'SQL_FILTER', 
-                                'DIRENTRY_GENERATOR', 
-                                'DIRENTRY_FILTER', 
-                                'REDUCIBLE_FILTER']
-        self._flags = flags
-        
-    flags = property(lambda self: self._flags)
+    def nodes_to_remove():
+        pass
 
-    def __getattr__(self, item):
-        uppercase_item = item.upper()
-        if uppercase_item in self._possible_flags:
-            return bool(eval('Semantic.%s' % uppercase_item) & self.flags)
-        else:
-            AttributeError(item)
 
-    def is_set(self, mask):
-        return bool(self.flags & mask)
-        
-    def __repr__(self):
-        flags = []
-        for flag in self._possible_flags:
-            if eval('self.%(field_name)s' % {'field_name' : flag.lower() }):
-                flags.append(flag)
-        return "<# Semantic " + ' | '.join(flags) + " >"
+class Filter(Operation):
+
+	def execute(self):	
+		self.filter(self)
+
+	def filter(self):
+		pass
+
+
+class FileFilter(Filter):
+
+	def filter(self):
+		self.filter_files()
+
+
+class TagFilter(Filter):
+
+	def filter(self):
+		self.filter_tags()
+
+
+class AttributeFilter(Filter):
+
+	def filter(self):
+		self.filter_attributes()
+
+
+class SQLFilter(Filter):
+
+	def filter(self):
+		self.filter_by_sql()
+
+
+class DirentryFilter(Filter):
+
+	def filter(self):
+		self.filter_direntries()
+
+
+class Generator(Operation):
+
+	def execute(self):
+		self.generate(self)
+
+	def generate(self):
+		pass
+
+class DirentryGenerator(Generator):
+
+	def generate(self):
+		self.generate_direntries()
+
+
+class Creator(Operation):
+
+    def execute(self):
+        self.create(self)
+    
+    def create(self):
+        pass
+
+class AttributeCreator(Creator):
+
+    def __init__(self, key, value, *args, **kw):
+        super(Creator, self).__init__(*args, **kw)
+        self.attr_key = key
+        self.attr_value = value
+        self.created_attribute = None
+
+    def create(self):
+        self.create_attribute()
+
+    def create_attribute(self):
+        self.created_attribute = m.Attribute(key=self.attr_key, value=self.attr_value)
+
+class TagCreator(Creator):
+
+    def __init__(self, name, *args, **kw):
+        super(Creator, self).__init__(*args, **kw)
+        self.tag_name = name
+        self.created_tag = None
+    
+    def create(self):
+        self.create_tag()
+
+    def create_tag(self):
+        self.created_tag = m.Tag(name=self.tag_name)
+
+class FileCreator(Creator):
+
+    def __init__(self, file_name, *args, **kw):
+        super(Creator, self).__init__(*args, **kw)
+        self.file_name = file_name
+        self.created_file = None
+    
+    def create(self):
+        self.create_file()
+
+    def create_file(self):
+        self.created_file = m.File(file_name=self.file_name)
+
+
+class AssociationCreator(Creator):
+    
+    def create(self):
+        self.create_association()
+
+
+class Destroyer(Operation):
+    
+    def 
+
+class AssociationDestroyer(Destroyer):
+    
+    def destroy(self):
+        self.destroy_association()
+
+class FileDestroyer(Destroyer):
+    
+    def destroy(self):
+        self.destroy_file()
+
+class TagDestroyer(Destroyer):
+    
+    def destroy(self):
+        self.destroy_tag()
+
+
+class AttributeDestroyer(Destroyer):
+    
+    def destroy(self):
+        self.destroy_attribute()
+
 
 class Registry:
 

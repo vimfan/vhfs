@@ -1,6 +1,6 @@
 from .operations import Namespace
-from .operations import semantic
-from .operations import Semantic
+from .operations import DirentryFilter
+from .operations import SQLFilter
 
 import models as m
 
@@ -10,43 +10,54 @@ class Func(Namespace):
 
         class Class:
 
-            @semantic(Semantic.SQL_FILTER | Semantic.DIRENTRY_FILTER)
-            def limit(context, limit, offset = 0):
-                limit  = int(limit)
-                offset = int(offset)
-                if limit > 0:
-                    context.query = context.query.limit(limit)
-                    Func.Public.Class.offset(context, offset)
+            class Limit(SQLFilter, DirentryFilter):
 
-            @semantic(Semantic.SQL_FILTER | Semantic.DIRENTRY_FILTER)
-            def offset(context, value):
-                value = int(value)
-                context.query.offset(value)
+                def __init__(self, limit, offset = 0, *args, **kw)
+                    SQLFilter.__init__(self, *args, **kw)
+                    DirentryFilter.__init__(self, *args, **kw)
+                    self.limit = int(limit)
+                    self.offset = int(offset)
+
+                def filter_by_sql(self):
+                    if self.limit > 0:
+                        q = self.context.query 
+                        q = q.limit(limit)
+                        Func.Public.Class.Offset(self.offset, self.context).filter_by_sql()
+
+            class Offset(SQLFilter, DirentryFilter):
+
+                def __init__(self, offset, *args, **kw)
+                    SQLFilter.__init__(self, *args, **kw)
+                    DirentryFilter.__init__(self, *args, **kw)
+                    self.offset = int(offset)
+
+                def filter_by_sql(self):
+                    if self.offset > 0:
+                        q = self.context.query
+                        q = q.offset(self.offset)
+
+            class Order(SQLFilter, DirentryFilter):
+
+                def __init__(self, *args, **kw)
+                    SQLFilter.__init__(self, *args, **kw)
+                    DirentryFilter.__init__(self, *args, **kw)
+                    self.offset = int(offset)
  
-            @semantic(Semantic.FILE_SQL_FILTER | Semantic.DIRENTRY_FILTER)
-            def order(context, *args):
-                if len(args) == 0:
-                    # perform some sorting on context.out
-                    pass
-                else:
-                    # sql query
-                    pass
- 
-            @semantic(Semantic.DIRENTRY_FILTER)
-            def like(context, pattern):
-                pass
+            #@semantic(Semantic.DIRENTRY_FILTER)
+            #def like(context, pattern):
+                #pass
                 
-            @semantic(Semantic.DIRENTRY_FILTER)
-            def regexp(context, pattern):
-                pass
+            #@semantic(Semantic.DIRENTRY_FILTER)
+            #def regexp(context, pattern):
+                #pass
         
-    class Reductor:
+    #class Reductor:
         
-        @staticmethod
-        def limit(nodes):
-            return nodes[-1]
+        #@staticmethod
+        #def limit(nodes):
+            #return nodes[-1]
 
-        @staticmethod
-        def order(nodes):
-            return nodes[-1]
+        #@staticmethod
+        #def order(nodes):
+            #return nodes[-1]
  
