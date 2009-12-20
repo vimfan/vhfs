@@ -4,6 +4,8 @@ import re
 
 from sets import Set
 
+import namespaces
+
 class Semantic(object):
 
 	def __init__(self, context):
@@ -14,6 +16,9 @@ class Feature(Semantic):
     
 	def __init__(self, *args, **kw):
 		super(Feature, self).__init__(*args, **kw)
+
+    def execute():
+        pass
 
 
 class Operation(Semantic):
@@ -26,9 +31,9 @@ class Operation(Semantic):
 
 
 class KeyNodeCapable(Feature):
-
-    def nodes_to_remove():
-        pass
+    pass
+    #def nodes_to_remove():
+        #pass
 
 
 class Filter(Operation):
@@ -75,7 +80,7 @@ class Generator(Operation):
 	def execute(self):
 		self.generate(self)
 
-	def generate(self):
+	def generate():
 		pass
 
 class DirentryGenerator(Generator):
@@ -89,7 +94,7 @@ class Creator(Operation):
     def execute(self):
         self.create(self)
     
-    def create(self):
+    def create():
         pass
 
 class AttributeCreator(Creator):
@@ -141,7 +146,8 @@ class AssociationCreator(Creator):
 
 class Destroyer(Operation):
     
-    def 
+    def execute(self):
+        self.destroy()
 
 class AssociationDestroyer(Destroyer):
     
@@ -165,128 +171,109 @@ class AttributeDestroyer(Destroyer):
         self.destroy_attribute()
 
 
-class Registry:
+class OperationsManager:
 
-    _entries = {}
-    _namespaces = []
+    def __init__(self):
+        self.module = 'namespaces'
+        self._namespace_names = []
+        self._operations = {}
+        for name in dir(test):
+            obj = eval('%(module)s.%(name)s' 
+                  % {'namespace' : self.module,'name' : name})
+            if (obj.__class__ == test.Namespace.__class__ 
+                and issubclass(o, test.Namespace) 
+                and not obj is test.Namespace):
+                namespace_name = obj.__name__
+                self.namespace_names.append(namespace_name)
+                for scope in ['Public', 'Private']:
+                    scope_subclass_signature = '.'.join([namespace_name, scope])
+                    try:
+                        # e.g. 'Tag.Public'
+                        scope_subclass = eval(scope_subclass_signature)
+                        for semantic in dir(scope_subclass):
+                            # e.g. 'Attribute.Public.Eq'
+                            semantic_signature = '.'.join([scope_subclass, semantic])
+                            self._operations[semantic_signature] = eval(semantic_signature)
+                    except:
+                        pass
+                        
+                        
 
-    class Entry:
-        pass
-
-    class OperationEntry(Entry):
-
-        def __init__(self, operation, semantic_flags):
-            '''
-            @param operation: Operation name
-            @type operation: str
-
-            @param semantic_flags: Bitwise conjunction of flags from set: Semantic.*
-            @type: int
-            '''
-            self.operation = operation
-            self.semantic = Semantic(semantic_flags)
-
-        def __repr__(self):
-            return "%s semantic: %s" % (self.operation, self.semantic)
-
-    @classmethod
-    def append_operation(cls, operation, semantic):
+    def _get_signature(self, namespace, operation_name, is_public = True, is_instance = True):
         '''
-        Add new entry to the registry.
+        Returns signature, e.g. for input:
+            namespace = 'Tag'
+            operation_name = 'Has'
+            is_public = True
+            is_instance = True
 
-        @param operation: String like Tag.Public.Class.dir, in general: {Namespace}.{Public|Private}[.Class].{operation}
-        @type operation: str
+            self._get_signature(...) => 'Tag.Public.Has'
 
-        @param semantic: Semantic of given operation
-        @type semantic: Semantic
-
-        @return: None
+        @return: Signature
+        @rtype: str
         '''
-        cls._entries[operation] = (cls.OperationEntry(operation, semantic))
-        cls._namespaces.append(operation.split('.')[0])
-        cls._namespaces = list(Set(cls._namespaces))
+        assert len(namespace) > 0
+        assert len(operation_name) > 0
+        # Please note capitalization of the operation name(!)
+        operation_name = operation_name.capitalize() 
+        operation_name_parts = [namespace, 'Public' if is_public else 'Private']
+        if not is_instance:
+            operation_name_parts.append('Class')
+        operation_name_parts.append(operation_name)
+        return '.'.join(operation_name_parts)
 
-    @classmethod
-    def semantic(cls, operation):
+
+    def get_operation(self, namespace, operation_name, is_public = True, is_instance = True):
         '''
-        Returns semantic of the operation given by E{operation}. 
-
-        @param operation: Operation
-        @type operation: instancemethod
-
-        @return: Semantic indicator
-        @rtype: Semantic
+        Returns operation object to execute.
         '''
-        for entry in cls._entries:
-            if entry.operation == operation:
-                return entry.semantic
+        signature = self._get_signature(namespace, operation_name, is_public, is_instance)
+        return self._operations[signature]()
 
-    @classmethod
-    def is_namespace_operation(cls, namespace, name, is_public = True, is_instance = True):
+
+    def is_operation_in_namespace(self, namespace, operation_name, is_public = True, is_instance = True):
         '''
-        Check whether operation with given C{name} is operation supported by
+        Checks whether operation with given C{name} is operation supported by
         given C{namespace}. Default search for public and instance operations.
             
         @param namespace Name of the namespace
         @type namespace str
-
-        @param name Name of the operation
-        @type name str
-
-        @param is_public Flag points if method is public or private
+ 
+        @param operation_name Name of the operation
+        @type operation_name str
+ 
+        @param is_public True if method public, false if private.
         @type bool 
-
-        @param is_instance Flag points if method is instance or class method (static)
+ 
+        @param is_instance True if method is an instance method of some
+                           instance (Tag.Has, Attribute.Eq etc.), False if it's
+                           class method (e.g. Func.limit)
         @type bool 
-
+ 
         @return True if operation is provided by namespace, false if not.
         @rtype bool
         '''
-        operation_name = ("%(namespace)s.%(scope)s" 
-            % {'namespace' : namespace, 'scope' : 'Public' if is_public else 'Private'})
-        if not is_instance:
-            operation_name += '.Class'
-        operation_name += '.' + name
-        return cls._entries.has_key(operation_name)
-
-    @classmethod
-    def get_namespaces_by_operation(cls, name, is_public = True, is_instance = True):
+        signature = self._get_signature(namespace, operation_name, is_public, is_instance)
+        return self._operations.has_key(signature)
+        
+    def get_namespaces_by_operation(self, name, is_public = True, is_instance = True):
+        '''
+        Gets all namespaces which implements operation given by name and satisfies
+        conditions is_public and is_instance.
+        '''
         namespaces = []
-        for namespace in cls._namespaces:
-            if cls.is_namespace_operation(namespace, name, is_public, is_instance):
+        for namespace in self._namespace_names:
+            if is_operation_from_namespace(namespace, name, is_public, is_instance):
                 namespaces.append(namespace)
         return namespaces
 
-    @classmethod
-    def get_namespaces(cls):
-        return cls._namespaces
 
+    def get_namespace_names(self):
+        '''
+        Returns names of all available namespaces.
+        '''
+        return copy.deepcopy(self._namespace_names)
 
-def semantic(semantic_indicator):
-    '''
-    Generates decorator function for operations. Every decorator generated by
-    its wraps method with staticmethod decorator.
-
-    @param semantic_indicator: Parameter indicating semantic.
-    @type semantic_indicator: Semanticfield
-    '''
-    decorator_name = 'semantic_' + str(semantic_indicator)
-    exec('''
-def %s(f):
-    i = 1
-    trace = []
-    trace.insert(0, f.func_name)
-    while True:
-        level = sys._getframe(i).f_code.co_name
-        if re.search("module", level):
-            break
-        trace.insert(0, level)
-        i += 1
-    operation_name = ".".join(trace)
-    Registry.append_operation(operation_name, %s)
-    return staticmethod(f)
-''' % (decorator_name, semantic_indicator))
-    return eval(decorator_name)
 
 class Namespace(object):
 
@@ -302,4 +289,3 @@ class Namespace(object):
     def ignore(cls):
         pass
           
-from namespaces import *
